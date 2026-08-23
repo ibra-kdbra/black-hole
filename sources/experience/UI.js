@@ -104,6 +104,34 @@ export default class UI
         return this.toggle(parent, label, () => this.params[key], (v) => { this.params[key] = v })
     }
 
+    /**
+     * Exclusive button row bound to a string parameter (palette, quality)
+     */
+    buttonGroup(parent, names, get, set)
+    {
+        const group = this.el('div', 'ui-presets', parent)
+        const buttons = names.map((name) =>
+        {
+            const b = this.el('button', 'ui-preset', group, name)
+            b.addEventListener('click', () =>
+            {
+                set(name)
+                refresh()
+            })
+            return b
+        })
+
+        const refresh = () =>
+        {
+            for(const b of buttons)
+                b.classList.toggle('is-active', b.textContent === get())
+        }
+
+        refresh()
+        this.inputs.push(refresh)
+        return group
+    }
+
     section(title, open = true)
     {
         const details = this.el('details', 'ui-section', this.panel)
@@ -155,6 +183,8 @@ export default class UI
 
         button('◔', 'Cinematic mode [C]', () => this.toggleCinematic())
         button('✦', 'Screenshot [S]', () => this.experience.requestScreenshot())
+        button('⧉', 'Copy a link to this exact view', () => this.experience.copyShareLink())
+        button('↺', 'Reset all settings', () => this.experience.reset())
         button('⛶', 'Fullscreen [F]', () => this.toggleFullscreen())
         button('?', 'Help [K]', () => this.helpOverlay.classList.toggle('is-open'))
         button('◑', 'Hide interface [H]', () => this.toggleVisibility())
@@ -173,13 +203,45 @@ export default class UI
             set: (v) => { this.params.massSolar = Math.pow(10, v) },
             format: () => `${UI.sci(this.params.massSolar)} M☉`
         })
+        this.slider(physicsSection, 'Spin a', {
+            min: 0, max: 0.998, step: 0.002,
+            get: () => this.params.spin,
+            set: (v) =>
+            {
+                this.params.spin = v
+                this.experience.disc.rebuild()
+            }
+        })
         this.paramSlider(physicsSection, 'Disc flow', 'discSpeed', 0, 3, 0.01, (v) => `${v.toFixed(2)}×`)
         this.paramSlider(physicsSection, 'Doppler beaming', 'doppler', 0, 1, 0.01)
         this.paramSlider(physicsSection, 'Grav. redshift', 'redshift', 0, 1, 0.01)
         this.paramSlider(physicsSection, 'Turbulence', 'turbulence', 0, 2, 0.01)
         this.paramSlider(physicsSection, 'Disc brightness', 'brightness', 0.2, 2.5, 0.01)
+        this.paramSlider(physicsSection, 'Hot-spot flare', 'hotSpot', 0, 2, 0.01)
         this.paramToggle(physicsSection, 'Polar jets', 'jets')
         this.paramSlider(physicsSection, 'Jet power', 'jetIntensity', 0, 1.5, 0.01)
+
+        this.el('div', 'ui-group-label', physicsSection, 'Disc palette')
+        this.buttonGroup(physicsSection, ['quasar', 'gargantua', 'xray', 'ember'],
+            () => this.params.palette,
+            (name) =>
+            {
+                this.params.palette = name
+                this.experience.disc.setGradient(name)
+            })
+
+        // --- Atmosphere -------------------------------------------------
+        const atmosphereSection = this.section('Atmosphere')
+
+        this.paramSlider(atmosphereSection, 'Nebula', 'nebula', 0, 1.5, 0.01)
+        this.toggle(atmosphereSection, 'Ambient sound',
+            () => this.params.audio,
+            (v) =>
+            {
+                this.params.audio = v
+                this.experience.audio.setEnabled(v)
+            })
+        this.paramSlider(atmosphereSection, 'Volume', 'audioVolume', 0, 1, 0.01)
 
         // --- Camera -----------------------------------------------------
         const cameraSection = this.section('Camera')
@@ -214,18 +276,28 @@ export default class UI
 
         // --- Quality ----------------------------------------------------
         const qualitySection = this.section('Quality', false)
-        const qualities = this.el('div', 'ui-presets', qualitySection)
-        for(const quality of ['low', 'medium', 'high'])
-        {
-            const b = this.el('button', 'ui-preset', qualities, quality)
-            b.addEventListener('click', () =>
+        this.buttonGroup(qualitySection, ['auto', 'low', 'medium', 'high'],
+            () => this.params.quality,
+            (quality) =>
             {
                 this.params.quality = quality
                 this.experience.resize()
-                qualities.querySelectorAll('.ui-preset').forEach((n) => n.classList.toggle('is-active', n.textContent === quality))
             })
-            if(quality === this.params.quality) b.classList.add('is-active')
-        }
+    }
+
+    /**
+     * Transient confirmation message
+     */
+    toast(message)
+    {
+        if(this.toastNode) this.toastNode.remove()
+        this.toastNode = this.el('div', 'ui-toast', this.root, message)
+        window.setTimeout(() => this.toastNode.classList.add('is-visible'), 20)
+        window.setTimeout(() =>
+        {
+            this.toastNode.classList.remove('is-visible')
+            window.setTimeout(() => this.toastNode.remove(), 400)
+        }, 2200)
     }
 
     setHud()
@@ -365,6 +437,7 @@ export default class UI
             this.fpsNode.textContent = `${this.fps.value} fps`
             this.fps.frames = 0
             this.fps.elapsed = 0
+            this.experience.reportFps(this.fps.value)
         }
 
         // HUD, 4 times a second
@@ -377,10 +450,13 @@ export default class UI
         const distance = rig.distanceToSingularity
         const distanceRs = distance / physics.schwarzschildRadius
 
+        const iscoRs = physics.iscoRadius / physics.schwarzschildRadius
+
         const rows = [
             ['Schwarzschild radius', `${UI.sci(physics.schwarzschildKm)} km`],
+            ['Spin', `a = ${this.params.spin.toFixed(2)}`],
             ['Shadow diameter', `${UI.sci(physics.shadowDiameterKm)} km`],
-            ['ISCO', `3 rₛ · ${UI.sci(physics.iscoKm)} km`],
+            [`ISCO · ${iscoRs.toFixed(2)} rₛ`, `${UI.sci(physics.iscoKm)} km`],
             ['Disc temperature', `${UI.sci(physics.discTemperatureK)} K`],
             ['Plasma at ISCO', `${(physics.orbitalBeta(physics.iscoRadius) * 100).toFixed(1)}% c`],
             ['Observer altitude', `${distanceRs.toFixed(1)} rₛ`],

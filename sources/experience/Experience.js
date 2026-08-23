@@ -7,11 +7,13 @@ import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
 import Physics from './Physics.js'
 import Noises from './Noises.js'
 import Stars from './Stars.js'
+import Nebula from './Nebula.js'
 import Disc from './Disc.js'
 import BlackHole from './BlackHole.js'
 import Jets from './Jets.js'
 import Distortion from './Distortion.js'
 import CameraRig from './CameraRig.js'
+import AmbientAudio from './AmbientAudio.js'
 import UI from './UI.js'
 
 import compositionVertex from '../shaders/composition/vertex.glsl'
@@ -28,13 +30,19 @@ export default class Experience
         this.params = {
             // Physics
             massSolar: 4.3e6,          // Sagittarius A*
+            spin: 0,                   // Kerr parameter a (0..0.998)
             discSpeed: 1,              // Keplerian flow multiplier
             doppler: 1,                // relativistic beaming strength
             redshift: 1,               // gravitational redshift strength
             turbulence: 1,             // disc noise displacement
             brightness: 1,             // disc emission multiplier
+            hotSpot: 0,                // orbiting flare strength
+            palette: 'quasar',         // disc gradient theme
             jets: true,
             jetIntensity: 0.7,
+            nebula: 0.6,               // background dust strength
+            audio: false,              // procedural soundscape
+            audioVolume: 0.5,
 
             // Lensing / post
             lensing: 1,
@@ -55,13 +63,25 @@ export default class Experience
             // Runtime
             paused: false,
             timeScale: 1,
-            quality: 'high'
+            quality: 'auto'
         }
+
+        // Snapshot for the reset action
+        this.defaults = JSON.parse(JSON.stringify(this.params))
+
+        // Accessibility: start calm for users who prefer reduced motion
+        if(window.matchMedia?.('(prefers-reduced-motion: reduce)').matches)
+            this.params.shake = false
 
         this.sizes = { width: window.innerWidth, height: window.innerHeight }
         this.time = 0
         this.clock = new THREE.Clock()
         this.screenshotRequested = false
+
+        // Adaptive quality state ('auto' lowers the pixel-ratio cap when the
+        // frame rate stays low)
+        this.autoPixelCap = 2
+        this.lowFpsStreak = 0
 
         this.physics = new Physics(this.params)
 
@@ -70,16 +90,20 @@ export default class Experience
 
         this.noises = new Noises(this)
         this.stars = new Stars(this)
+        this.nebula = new Nebula(this)
         this.disc = new Disc(this)
         this.blackHole = new BlackHole(this)
         this.jets = new Jets(this)
         this.distortion = new Distortion(this)
         this.cameraRig = new CameraRig(this)
+        this.audio = new AmbientAudio(this)
 
         this.setComposition()
         this.setPostProcessing()
 
         this.ui = new UI(this)
+
+        this.applyShareState()
 
         // Console access for tinkerers
         window.experience = this
@@ -108,8 +132,29 @@ export default class Experience
 
     get pixelRatio()
     {
-        const cap = { low: 1, medium: 1.5, high: 2 }[this.params.quality] ?? 2
+        const cap = this.params.quality === 'auto'
+            ? this.autoPixelCap
+            : ({ low: 1, medium: 1.5, high: 2 }[this.params.quality] ?? 2)
         return Math.min(cap, window.devicePixelRatio)
+    }
+
+    /**
+     * Fed by the UI's FPS meter. In 'auto' quality, three consecutive slow
+     * samples lower the pixel-ratio cap a notch (never raised back within
+     * the session, to avoid oscillation).
+     */
+    reportFps(fps)
+    {
+        if(this.params.quality !== 'auto' || !fps) return
+
+        this.lowFpsStreak = fps < 28 ? this.lowFpsStreak + 1 : 0
+
+        if(this.lowFpsStreak >= 3 && this.autoPixelCap > 1)
+        {
+            this.autoPixelCap = Math.max(1, this.autoPixelCap - 0.5)
+            this.lowFpsStreak = 0
+            this.resize()
+        }
     }
 
     setComposition()
@@ -200,6 +245,98 @@ export default class Experience
         this.composer.setSize(this.sizes.width, this.sizes.height)
     }
 
+    /**
+     * Restore every parameter to its default and rebuild what depends on it
+     */
+    reset()
+    {
+        Object.assign(this.params, JSON.parse(JSON.stringify(this.defaults)))
+        this.disc.setGradient(this.params.palette)
+        this.disc.rebuild()
+        this.audio.setEnabled(this.params.audio)
+        this.autoPixelCap = 2
+        this.resize()
+        this.ui.syncControls()
+    }
+
+    /* ------------------------------------------------------------------ */
+    /* Shareable state                                                     */
+    /* ------------------------------------------------------------------ */
+
+    shareableState()
+    {
+        const camera = this.cameraRig.camera
+        const spherical = new THREE.Spherical().setFromVector3(camera.position)
+
+        return {
+            v: 1,
+            p: this.params,
+            cam: [
+                Number(spherical.radius.toFixed(3)),
+                Number(spherical.phi.toFixed(4)),
+                Number(spherical.theta.toFixed(4))
+            ]
+        }
+    }
+
+    copyShareLink()
+    {
+        const encoded = btoa(encodeURIComponent(JSON.stringify(this.shareableState())))
+        const url = `${location.origin}${location.pathname}#s=${encoded}`
+        history.replaceState(null, '', `#s=${encoded}`)
+
+        if(navigator.clipboard?.writeText)
+        {
+            navigator.clipboard.writeText(url)
+                .then(() => this.ui.toast('View link copied'))
+                .catch(() => this.ui.toast('Link is in the address bar'))
+        }
+        else
+        {
+            this.ui.toast('Link is in the address bar')
+        }
+    }
+
+    applyShareState()
+    {
+        const match = location.hash.match(/^#s=(.+)$/)
+        if(!match) return
+
+        try
+        {
+            const state = JSON.parse(decodeURIComponent(atob(match[1])))
+
+            // Only known keys, so a crafted link can't inject anything
+            for(const key of Object.keys(this.defaults))
+            {
+                if(state.p?.[key] !== undefined && typeof state.p[key] === typeof this.defaults[key])
+                    this.params[key] = state.p[key]
+            }
+            this.params.audio = false // sound stays opt-in per visit
+
+            if(Array.isArray(state.cam) && state.cam.length === 3)
+            {
+                const [radius, phi, theta] = state.cam.map(Number)
+                const spherical = new THREE.Spherical(
+                    THREE.MathUtils.clamp(radius, 2, 80),
+                    THREE.MathUtils.clamp(phi, 0.001, Math.PI - 0.001),
+                    theta
+                )
+                this.cameraRig.camera.position.setFromSpherical(spherical)
+                this.cameraRig.camera.lookAt(0, 0, 0)
+            }
+
+            this.disc.setGradient(this.params.palette)
+            this.disc.rebuild()
+            this.resize()
+            this.ui.syncControls()
+        }
+        catch(error)
+        {
+            console.warn('Ignored malformed share link', error)
+        }
+    }
+
     requestScreenshot()
     {
         this.screenshotRequested = true
@@ -230,10 +367,12 @@ export default class Experience
         // Update world
         this.cameraRig.update(delta, this.time)
         this.stars.update(this.time)
+        this.nebula.update(this.time)
         this.disc.update(this.time)
         this.blackHole.update(camera)
         this.jets.update(this.time)
         this.distortion.update(camera)
+        this.audio.update(delta, this.cameraRig.distanceToSingularity)
 
         // Project the singularity to screen space for the lensing convergence
         const screenPosition = new THREE.Vector3(0, 0, 0)
