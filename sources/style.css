@@ -171,6 +171,7 @@ canvas.webgl
 
 .ui-section
 {
+    flex-shrink: 0;
     background: var(--glass);
     border: 1px solid var(--glass-border);
     border-radius: 14px;
@@ -381,6 +382,47 @@ canvas.webgl
     border-color: var(--accent);
     background: rgba(255, 86, 0, 0.22);
     color: var(--accent-soft);
+}
+
+.ui-group-label
+{
+    margin-top: 3px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+}
+
+/* ------------------------------------------------------------------ */
+/* Toast                                                               */
+/* ------------------------------------------------------------------ */
+
+.ui-toast
+{
+    position: absolute;
+    left: 50%;
+    bottom: 88px;
+    transform: translateX(-50%) translateY(8px);
+    padding: 9px 18px;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-soft);
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    pointer-events: none;
+}
+
+.ui-toast.is-visible
+{
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
 }
 
 /* ------------------------------------------------------------------ */
