@@ -4,11 +4,15 @@ uniform sampler2D uNoisesTexture;
 uniform float uInnerRadius;
 uniform float uOuterRadius;
 uniform float uSchwarzschildRadius;
+uniform float uSpin;
 uniform float uFlowSpeed;
 uniform float uDoppler;
 uniform float uRedshift;
 uniform float uTurbulence;
 uniform float uBrightness;
+uniform float uHotSpot;
+uniform float uHotSpotPhase;
+uniform float uHotSpotRadius;
 
 varying vec2 vUv;
 varying vec3 vWorldPosition;
@@ -20,9 +24,12 @@ void main() {
   // Radius of this fragment: uv.y goes 0 (outer edge) -> 1 (inner edge)
   float radius = mix(uOuterRadius, uInnerRadius, vUv.y);
 
-  // Keplerian angular velocity: omega = sqrt(GM / r^3), with GM = rs / 2
-  // (c = 1). Inner plasma laps the outer disc, shearing the noise field.
-  float omega = sqrt(uSchwarzschildRadius / (2.0 * radius * radius * radius));
+  // Keplerian angular velocity omega = sqrt(GM / r^3) with GM = rs / 2
+  // (c = 1), plus Lense-Thirring frame dragging (2 a M^2 / r^3) for a
+  // spinning hole. Inner plasma laps the outer disc, shearing the noise.
+  float M = 0.5 * uSchwarzschildRadius;
+  float r3 = radius * radius * radius;
+  float omega = sqrt(M / r3) + uSpin * 2.0 * M * M / r3;
   float azimuthShift = omega * uTime * uFlowSpeed / 6.2831853;
 
   vec2 flowUv = vec2(vUv.x - azimuthShift, vUv.y);
@@ -45,6 +52,15 @@ void main() {
 
   vec4 color = texture(uGradientTexture, uv);
   color.a = uv.y;
+
+  // --- Orbiting hot spot --------------------------------------------------
+  // A compact flare riding the flow just outside the inner edge. Added
+  // before the Doppler pass so it beams and shifts like the plasma it
+  // lives in.
+  float spotAngle = abs(fract(vUv.x - uHotSpotPhase + 0.5) - 0.5);
+  float spotRadial = (radius - uHotSpotRadius) / 0.45;
+  float spot = exp(-(pow(spotAngle / 0.05, 2.0) + spotRadial * spotRadial));
+  color.rgb += vec3(1.0, 0.93, 0.8) * spot * uHotSpot * falloff * 2.0;
 
   // --- Relativistic Doppler beaming --------------------------------------
   // Circular geodesic speed: beta = sqrt(rs / (2 r)); direction follows

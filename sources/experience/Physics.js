@@ -27,9 +27,31 @@ export default class Physics
         // Geometric units (world space)
         this.schwarzschildRadius = 0.5
         this.photonSphereRadius = 1.5 * this.schwarzschildRadius
-        this.shadowRadius = Math.sqrt(27) / 2 * this.schwarzschildRadius
-        this.iscoRadius = 3 * this.schwarzschildRadius
         this.discOuterRadius = 12 * this.schwarzschildRadius
+    }
+
+    /**
+     * Prograde ISCO for a Kerr hole of spin a (Bardeen-Press-Teukolsky):
+     * 6M at a = 0, shrinking toward M as a -> 1, in units M = rs / 2.
+     * The disc inner edge follows it.
+     */
+    get iscoRadius()
+    {
+        const a = this.params.spin
+        const M = this.schwarzschildRadius / 2
+        const z1 = 1 + Math.cbrt(1 - a * a) * (Math.cbrt(1 + a) + Math.cbrt(1 - a))
+        const z2 = Math.sqrt(3 * a * a + z1 * z1)
+        return M * (3 + z2 - Math.sqrt((3 - z1) * (3 + z1 + 2 * z2)))
+    }
+
+    /**
+     * Apparent shadow radius: sqrt(27)/2 rs for Schwarzschild, mildly
+     * shrinking with prograde spin (first-order approximation of the
+     * Kerr shadow's mean radius).
+     */
+    get shadowRadius()
+    {
+        return Math.sqrt(27) / 2 * this.schwarzschildRadius * (1 - 0.13 * this.params.spin)
     }
 
     /**
@@ -42,12 +64,12 @@ export default class Physics
 
     get shadowDiameterKm()
     {
-        return 2 * Math.sqrt(27) / 2 * this.schwarzschildKm
+        return 2 * this.shadowRadius / this.schwarzschildRadius * this.schwarzschildKm
     }
 
     get iscoKm()
     {
-        return 3 * this.schwarzschildKm
+        return this.iscoRadius / this.schwarzschildRadius * this.schwarzschildKm
     }
 
     /**

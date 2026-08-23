@@ -15,11 +15,13 @@ export default class BlackHole
         const physics = experience.physics
 
         // Shadow: an opaque black sphere occludes stars and the far side of
-        // the disc, giving the silhouette a real depth footprint
+        // the disc, giving the silhouette a real depth footprint. Unit
+        // radius, scaled each frame so spin can shrink it.
         this.shadow = new THREE.Mesh(
-            new THREE.SphereGeometry(physics.shadowRadius, 48, 48),
+            new THREE.SphereGeometry(1, 48, 48),
             new THREE.MeshBasicMaterial({ color: '#000000' })
         )
+        this.shadow.scale.setScalar(physics.shadowRadius)
         this.experience.scene.add(this.shadow)
 
         // Photon ring: camera-facing billboard, additive glow
@@ -45,6 +47,10 @@ export default class BlackHole
 
     update(camera)
     {
+        const physics = this.experience.physics
+
+        this.shadow.scale.setScalar(physics.shadowRadius)
+        this.ring.material.uniforms.uRadius.value = physics.shadowRadius
         this.ring.lookAt(camera.position)
     }
 }
