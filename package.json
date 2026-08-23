@@ -1,5 +1,20 @@
 {
-  "repository": "#",
+  "name": "black-hole",
+  "version": "2.0.0",
+  "description": "A real-time, physically grounded black hole: Keplerian accretion disc, relativistic Doppler beaming, gravitational redshift, photon ring, lensing and polar jets in WebGL.",
+  "repository": "ibra-kdbra/black-hole",
+  "author": "ibra-kdbra",
+  "keywords": [
+    "black-hole",
+    "threejs",
+    "webgl",
+    "glsl",
+    "shaders",
+    "relativity",
+    "gravitational-lensing",
+    "accretion-disc",
+    "visualization"
+  ],
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
