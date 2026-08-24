@@ -384,6 +384,64 @@ canvas.webgl
     color: var(--accent-soft);
 }
 
+.ui-preset.ui-wide
+{
+    grid-column: 1 / -1;
+    width: 100%;
+    margin-top: 2px;
+}
+
+/* ------------------------------------------------------------------ */
+/* Guided tour                                                         */
+/* ------------------------------------------------------------------ */
+
+.ui-tour
+{
+    position: absolute;
+    left: 50%;
+    bottom: 92px;
+    transform: translateX(-50%) translateY(12px);
+    width: min(560px, calc(100vw - 48px));
+    padding: 18px 22px 14px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s ease;
+}
+
+.ui-tour.is-open
+{
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.ui-tour-text
+{
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--text);
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
+    min-height: 42px;
+}
+
+.ui-tour-controls
+{
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.ui-tour-controls .ui-preset
+{
+    padding: 6px 14px;
+}
+
 .ui-group-label
 {
     margin-top: 3px;

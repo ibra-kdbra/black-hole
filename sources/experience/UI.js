@@ -1,10 +1,34 @@
 /**
  * Custom glass UI: control panel, physics HUD, playback bar, help overlay,
- * keyboard shortcuts, FPS meter, screenshot and fullscreen actions.
- * No UI library - plain DOM, styled in style.css.
+ * guided tour, keyboard shortcuts, FPS meter, screenshot and fullscreen
+ * actions. No UI library - plain DOM, styled in style.css.
  */
 export default class UI
 {
+    static TOUR = [
+        { preset: 'overview', text: 'This is a supermassive black hole — a region of spacetime wrapped so tightly that nothing, not even light, escapes the horizon.' },
+        { preset: 'close', text: 'The dark disc is the shadow: gravity lenses light around the horizon, casting a silhouette about 2.6× wider than the horizon itself.' },
+        { text: 'The thin bright edge is the photon ring — light that circled the hole, sometimes more than once, before escaping to your eye.' },
+        { preset: 'overview', text: 'The glowing spiral is the accretion disc: plasma sheared into million-degree streams, orbiting at almost half the speed of light near the inner edge.' },
+        { preset: 'edge', text: 'One side outshines the other: relativistic Doppler beaming. The plasma racing toward you piles its light into your line of sight.' },
+        { preset: 'top', text: 'The disc ends abruptly at the ISCO — the innermost stable circular orbit. Inside it, matter has no stable path and plunges in.' },
+        {
+            preset: 'overview',
+            text: 'Spin the hole up and spacetime itself is dragged around with it: the stable orbits creep inward and the disc dives closer to the shadow.',
+            action: (experience) =>
+            {
+                experience.params.spin = 0.9
+                experience.disc.rebuild()
+            }
+        },
+        { preset: 'edge', text: 'Magnetic fields wound up by the spinning disc launch jets of plasma along the poles at relativistic speeds.' },
+        {
+            text: 'And when a star wanders too close, tides tear it apart — half its debris escapes, half rains back as a blazing accretion flare.',
+            action: (experience) => experience.tidal.trigger()
+        },
+        { preset: 'overview', text: 'Explore freely — every number in the panel is yours to bend.' }
+    ]
+
     constructor(experience)
     {
         this.experience = experience
@@ -19,12 +43,16 @@ export default class UI
         this.root.className = 'ui'
         document.body.appendChild(this.root)
 
+        this.tourIndex = -1
+        this.tourTimer = null
+
         this.setHeader()
         this.setActions()
         this.setPanel()
         this.setHud()
         this.setPlayback()
         this.setHelp()
+        this.setTour()
         this.setIntro()
         this.setKeyboard()
     }
@@ -221,6 +249,10 @@ export default class UI
         this.paramToggle(physicsSection, 'Polar jets', 'jets')
         this.paramSlider(physicsSection, 'Jet power', 'jetIntensity', 0, 1.5, 0.01)
 
+        const feedButton = this.el('button', 'ui-preset ui-wide', physicsSection, '☄ Feed a star')
+        feedButton.title = 'Send a star to its tidal disruption [T]'
+        feedButton.addEventListener('click', () => this.experience.tidal.trigger())
+
         this.el('div', 'ui-group-label', physicsSection, 'Disc palette')
         this.buttonGroup(physicsSection, ['quasar', 'gargantua', 'xray', 'ember'],
             () => this.params.palette,
@@ -257,6 +289,10 @@ export default class UI
         presetButton('Edge-on', 'edge', '2')
         presetButton('Top-down', 'top', '3')
         presetButton('Close-up', 'close', '4')
+
+        const tourButton = this.el('button', 'ui-preset ui-wide', cameraSection, '✧ Guided tour')
+        tourButton.title = 'A narrated flight through the physics [G]'
+        tourButton.addEventListener('click', () => this.toggleTour())
 
         this.paramSlider(cameraSection, 'Field of view', 'fov', 20, 90, 1, (v) => `${Math.round(v)}°`)
         this.paramSlider(cameraSection, 'Camera roll', 'roll', -0.8, 0.8, 0.01, (v) => `${Math.round(v * 180 / Math.PI)}°`)
@@ -334,6 +370,8 @@ export default class UI
             ['scroll', 'dolly in / out'],
             ['1 – 4', 'camera presets'],
             ['C', 'cinematic mode'],
+            ['G', 'guided tour'],
+            ['T', 'feed a star to the hole'],
             ['Space', 'pause time'],
             ['S', 'save screenshot'],
             ['F', 'fullscreen'],
@@ -353,6 +391,73 @@ export default class UI
         {
             if(event.target === this.helpOverlay) this.helpOverlay.classList.remove('is-open')
         })
+    }
+
+    setTour()
+    {
+        this.tour = this.el('div', 'ui-tour', this.root)
+        this.tourText = this.el('p', 'ui-tour-text', this.tour)
+
+        const controls = this.el('div', 'ui-tour-controls', this.tour)
+        const next = this.el('button', 'ui-preset', controls, 'next')
+        next.addEventListener('click', () => this.nextTourStep())
+        const end = this.el('button', 'ui-preset', controls, 'end tour')
+        end.addEventListener('click', () => this.endTour())
+    }
+
+    get tourActive()
+    {
+        return this.tourIndex >= 0
+    }
+
+    toggleTour()
+    {
+        if(this.tourActive) this.endTour()
+        else this.startTour()
+    }
+
+    startTour()
+    {
+        this.tourSavedSpin = this.params.spin
+        this.tourIndex = -1
+        this.tour.classList.add('is-open')
+        this.nextTourStep()
+    }
+
+    nextTourStep()
+    {
+        window.clearTimeout(this.tourTimer)
+        this.tourIndex++
+
+        const step = UI.TOUR[this.tourIndex]
+        if(!step)
+        {
+            this.endTour()
+            return
+        }
+
+        if(step.preset) this.experience.cameraRig.flyTo(step.preset)
+        if(step.action) step.action(this.experience)
+        this.tourText.textContent = step.text
+        this.syncControls()
+
+        this.tourTimer = window.setTimeout(() => this.nextTourStep(), 9500)
+    }
+
+    endTour()
+    {
+        window.clearTimeout(this.tourTimer)
+        if(!this.tourActive) return
+        this.tourIndex = -1
+        this.tour.classList.remove('is-open')
+
+        // Undo the tour's spin demonstration
+        if(this.params.spin !== this.tourSavedSpin)
+        {
+            this.params.spin = this.tourSavedSpin
+            this.experience.disc.rebuild()
+            this.syncControls()
+        }
     }
 
     setIntro()
@@ -378,6 +483,8 @@ export default class UI
                 case 'f': this.toggleFullscreen(); break
                 case 's': this.experience.requestScreenshot(); break
                 case 'c': this.toggleCinematic(); break
+                case 't': this.experience.tidal.trigger(); break
+                case 'g': this.toggleTour(); break
                 case 'k': this.helpOverlay.classList.toggle('is-open'); break
                 case '1': this.experience.cameraRig.flyTo('overview'); break
                 case '2': this.experience.cameraRig.flyTo('edge'); break
@@ -462,6 +569,10 @@ export default class UI
             ['Observer altitude', `${distanceRs.toFixed(1)} rₛ`],
             ['Your clock rate', `${(physics.timeDilation(distance) * 100).toFixed(2)}%`]
         ]
+
+        const flare = this.experience.tidal.flare
+        if(flare > 0.02)
+            rows.push(['Accretion flare', `${(1 + flare * 1.2).toFixed(2)}× L`])
 
         this.hudBody.innerHTML = rows
             .map(([k, v]) => `<span class="ui-hud-key">${k}</span><span class="ui-hud-value">${v}</span>`)
