@@ -1,93 +1,50 @@
-<div align="center">
+# Black Hole
 
-# BLACK HOLE
+A real-time, physically grounded black hole visualization for the browser, built with three.js and custom GLSL shaders.
 
-**A real-time, physically grounded black hole in your browser.**
+![Three.js](https://img.shields.io/badge/three.js-0.185-black?logo=three.js&logoColor=white)
+![Vite](https://img.shields.io/badge/vite-8-646CFF?logo=vite&logoColor=white)
+![GLSL](https://img.shields.io/badge/shaders-GLSL-ff5600)
+![Procedural](https://img.shields.io/badge/textures-100%25%20procedural-cc00ff)
 
-Keplerian accretion disc · relativistic Doppler beaming · gravitational redshift · photon ring · lensing · polar jets
+<img src="./docs/screenshots/overview.jpg" alt="Overview of the black hole with accretion disc, photon ring and polar jets" width="100%" />
 
-![Three.js](https://img.shields.io/badge/Three.js-WebGL-black?logo=three.js&logoColor=white)
-![GLSL](https://img.shields.io/badge/GLSL-shaders-ff5600)
-![Vite](https://img.shields.io/badge/Vite-build-646CFF?logo=vite&logoColor=white)
-![No external assets](https://img.shields.io/badge/textures-100%25%20procedural-cc00ff)
+Every texture is generated procedurally in GLSL, and every scale in the scene derives from a single Schwarzschild radius, so the shadow, the photon ring, the disc truncation and the plasma velocities always stay in correct physical proportion to one another.
 
-<img src="./docs/screenshots/overview.jpg" alt="Black hole overview" width="100%" />
+## Table of contents
 
-</div>
+- [Overview](#overview)
+- [Getting started](#getting-started)
+- [Controls](#controls)
+- [Features](#features)
+- [Physics model](#physics-model)
+- [Gallery](#gallery)
+- [Architecture](#architecture)
+- [Performance](#performance)
+- [References](#references)
+- [Author](#author)
 
----
+## Overview
 
-Everything on screen is generated procedurally in GLSL, there is not a single texture file in the project. The scene is built in geometric units where the Schwarzschild radius is fixed, so the shadow, the photon ring, the inner edge of the disc and the plasma velocities always stay in physically correct proportion to each other.
+The application renders a Kerr black hole with its accretion disc, photon ring, relativistic jets and gravitationally lensed star field, and exposes every physical and cinematic parameter through a custom interface. Two rendering modes are available:
 
-## ✨ Features
+- **Real-time mode**: a rasterized scene with screen-space lensing, tuned to run on any GPU.
+- **Geodesic photo mode**: every pixel integrates a true null geodesic of the metric (Schwarzschild, or Kerr when the hole spins), so the shadow, the photon ring and the lensed arcs of the disc emerge from the geometry itself.
 
-**Physics**
+Three layers of explanation are built in: a narrated guided tour for first-time visitors, a hover inspector that reports live physics for whatever the pointer rests on, and a science panel listing every equation used together with its source paper.
 
-- **Keplerian differential rotation**: disc plasma is advected with ω = √(GM/r³); the inner edge visibly laps the outer disc, shearing the turbulence into trailing spirals
-- **Kerr spin**: drag the spin slider from Schwarzschild to near-extremal (a = 0.998): the ISCO follows the exact Bardeen-Press-Teukolsky formula (6M → 1.24M), so the disc reaches deeper, the plasma gets faster, Lense-Thirring frame dragging accelerates the flow, and the shadow tightens
-- **Orbiting hot-spot flare**: a compact flare riding the flow just outside the inner edge at its true angular velocity, beamed and shifted like the plasma around it (the kind of orbiting spot the GRAVITY interferometer tracked around Sgr A*)
-- **Geodesic photo mode**: press `P` and every pixel integrates a real null geodesic backwards from the camera: the shadow, the photon ring and the lensed arcs of the disc's far side above and below the hole all emerge from the geometry itself, nothing painted on. Schwarzschild uses the compact form d²x/dλ² = −3/2 rs h² x/r⁵; with spin the marcher switches to the **Kerr metric in Kerr-Schild coordinates**, integrated as a Hamiltonian system (H = ½[p² − E² − f(l·p+E)²]), so frame dragging, the displaced D-shaped shadow and the tightened prograde photon orbits appear for real. Bloom, grain and supersampled screenshots still apply
-- **Living event horizon**: the shadow's core stays void-black, but its silhouette simmers with palette-tinted turbulence concentrated toward the disc plane, and the photon ring's brightness crawls with the flow, the hole reads as a presence, not a matte ball
-- **Tidal disruption events**: press `T` and a star falls in on a parabolic orbit, stretches as it crosses the tidal radius, and is torn into 4 500 debris particles integrated with real gravity: about half escape, the rest rain back, circularize into the disc and feed an accretion flare that brightens the disc, the jets and the bloom before decaying away
-- **Relativistic Doppler beaming**: the approaching limb flares up (δ³ intensity boost) and blueshifts, the receding limb fades and reddens, from the actual orbital β = √(rs/2r) ≈ 0.41 c at the inner edge
-- **Gravitational redshift**: emission near the ISCO is dimmed and reddened by the combined orbital + gravitational time dilation √(1 − 3rs/2r)
-- **Photon ring**: a bright, thin ring of once-orbiting light hugging the shadow at √27/2 · rs, the correct lensed silhouette radius
-- **Accurate proportions**: event-horizon shadow, photon sphere, and disc truncation at the ISCO (3 rs) all derive from one Schwarzschild radius
-- **Gravitational lensing**: a screen-space deflection field bends the star field and disc toward the hole, strongest near the photon sphere
-- **Relativistic polar jets**: collimated, precessing plasma columns launched along the spin axis (toggleable)
-- **Blackbody starfield**: 12 000 stars colored by real Planckian-locus temperatures (2 500 K to 25 000 K) with per-star scintillation
-- **Live observatory HUD**: pick a mass from 1 M☉ to 10¹⁰ M☉ and read off the real Schwarzschild radius in km, shadow diameter, ISCO, disc temperature (T ∝ M^(−1/4)), plasma speed, and your own clock rate at the camera's altitude
+## Getting started
 
-**Experience**
-
-- **Cinematic camera system**: damped orbit controls, four named viewpoints with eased flight transitions (`1-4`), an autonomous cinematic drift mode (`C`), adjustable FOV, roll and handheld micro-shake
-- **Guided tour**: press `G` for a narrated flight through the physics: shadow, photon ring, beaming, ISCO, frame dragging… ending with a star being torn apart
-- **Hover inspector**: rest the pointer on anything and get live physics for that exact spot: the disc's local radius in rₛ, orbital speed, temperature and whether that limb is beamed toward you; the shadow's real size for the chosen mass; the jets; a doomed star's stretching factor mid-plunge
-- **Custom glass UI**: dependency-free control panel for every physics, camera and film parameter, collapsible sections, keyboard shortcuts, help overlay
-- **Disc palette themes**: quasar (default), Gargantua amber, X-ray binary blue, ember
-- **Procedural nebula backdrop**: wispy interstellar dust drifting behind the starfield, still zero texture files
-- **Procedural ambient audio**: a brown-noise rumble and detuned drones synthesized live with WebAudio; the well sounds deeper and louder the closer you fall (opt-in)
-- **Shareable views**: one click copies a link that restores your exact settings and camera angle
-- **Film pipeline**: selective bloom, gravitationally-warped chromatic aberration, luminance-weighted animated grain, vignette, each with its own slider
-- **The science inside**: press `I` for the full derivation sheet: every equation the scene uses (Schwarzschild radius through the Kerr-Schild Hamiltonian) with the papers they come from, Bardeen-Press-Teukolsky, Shakura-Sunyaev, Luminet, the Interstellar DNGR paper, GRAVITY and the EHT
-- **First-visit onboarding**: the guided tour starts itself the first time someone opens the page (and never again after that)
-- **Quality & comfort**: adaptive auto quality that lowers resolution when the frame rate dips, manual low/medium/high presets, FPS meter, time scale & pause, one-key PNG screenshots (`S`), fullscreen (`F`), one-click reset, `prefers-reduced-motion` support
-- **Engineered to run lean**: every shader precompiles behind the intro (no mid-session compile stalls), the render loop allocates zero objects per frame, resizes and geometry rebuilds are coalesced, audio suspends in background tabs, and a full `destroy()` releases every GPU resource and listener
-
-## 📸 Views
-
-| Edge-on | Top-down |
-| --- | --- |
-| ![Edge-on](./docs/screenshots/edge-on.jpg) | ![Top-down](./docs/screenshots/top-down.jpg) |
-
-Gargantua palette at spin a = 0.9, the ISCO drops to 1.16 rs and the disc hugs the shadow:
-
-<img src="./docs/screenshots/gargantua.jpg" alt="Gargantua palette, spin 0.9" width="100%" />
-
-Geodesic photo mode (`P`), the same disc, but every pixel ray-marches a true null geodesic; the far side of the disc arcs over and under the shadow exactly as general relativity says it should:
-
-<img src="./docs/screenshots/geodesic.jpg" alt="Geodesic photo mode" width="100%" />
-
-Spin it up to a = 0.9 in geodesic mode and the marcher switches to the Kerr metric: the shadow shrinks, turns D-shaped with the flat edge on the approaching side, and a prograde photon arc ignites inside it, all from integrating the metric:
-
-<img src="./docs/screenshots/kerr.jpg" alt="Kerr geodesic mode at spin 0.9" width="100%" />
-
-<img src="./docs/screenshots/interface.jpg" alt="Interface" width="100%" />
-
-## 🚀 Setup
+Requires Node.js 20.19 or later.
 
 ```bash
-# Install dependencies (only the first time)
-npm install
-
-# Run the local server at localhost:5173
-npm run dev
-
-# Production build in dist/
-npm run build
+npm install      # install dependencies
+npm run dev      # development server at http://localhost:5173
+npm run build    # production build in dist/
+npm run preview  # serve the production build
 ```
 
-## 🎮 Controls
+## Controls
 
 | Input | Action |
 | --- | --- |
@@ -97,55 +54,134 @@ npm run build
 | `C` | cinematic mode (autonomous drift) |
 | `G` | guided tour |
 | `P` | geodesic photo mode |
-| `I` | the science inside, equations & references |
-| `T` | feed a star to the hole |
+| `T` | feed a star to the hole (tidal disruption) |
+| `I` | science panel: equations and references |
 | `Space` | pause time |
 | `S` | save a supersampled PNG screenshot |
 | `F` | fullscreen |
 | `H` | hide the interface |
 | `K` | shortcuts panel |
 
-Every parameter is also live in the side panel, mass, disc flow, beaming and redshift strength, turbulence, jets, lensing, bloom, grain, camera roll…
+Every parameter is also exposed in the side panel: mass, spin, disc flow, beaming and redshift strength, turbulence, jets, lensing, bloom, grain, camera roll and more.
 
-## 🔭 How the physics works
+## Features
 
-The scene uses geometric units with rs = 0.5 world units. From that single number:
+### Physics
+
+| Feature | Model |
+| --- | --- |
+| Disc dynamics | Keplerian differential rotation, Ω = √(GM/r³), with bounded flow-map shear and radial inflow |
+| Kerr spin | Exact Bardeen-Press-Teukolsky ISCO (6M at a = 0 down to 1.24M near extremal), Lense-Thirring frame dragging, tightening shadow |
+| Doppler beaming | δ³ intensity boost with spectral tilt from the true orbital β = √(rs/2r), 0.41c at the inner edge |
+| Gravitational redshift | Combined orbital and gravitational time dilation √(1 − 3rs/2r) |
+| Photon ring | Bright ring at the correct lensed silhouette radius, √27/2 · rs |
+| Geodesic ray marching | Schwarzschild fast path d²x/dλ² = −3/2 rs h² x/r⁵; Kerr-Schild Hamiltonian H = ½[p² − E² − f(l·p+E)²] when spinning |
+| Tidal disruption events | A star on a parabolic infall, spaghettified at the tidal radius into 4,500 gravity-integrated debris particles feeding an accretion flare |
+| Hot-spot flares | A compact flare riding the flow at its true angular velocity, as observed by the GRAVITY interferometer at Sgr A* |
+| Relativistic jets | Polar plasma columns, spin energy extracted magnetically (Blandford-Znajek) |
+| Star field | 12,000 stars on the Planckian locus (2,500 K to 25,000 K) with per-star scintillation |
+
+### Interface
+
+- Custom dependency-free control panel, observatory HUD with real-unit readouts (Schwarzschild radius, shadow diameter, ISCO, disc temperature, time dilation at the camera)
+- Guided tour with step progress, starting automatically on a first visit
+- Hover inspector: local radius, orbital speed, temperature and Doppler state for the exact point under the cursor
+- Science panel with every equation and reference
+- Cinematic camera rig: four presets with eased flights, autonomous drift mode, adjustable FOV, roll and hand-held shake
+- Shareable view links restoring all settings and the camera angle
+- Disc palette themes, procedural nebula backdrop, opt-in procedural ambient audio
+- Film pipeline: selective bloom, chromatic aberration, luminance-weighted grain, vignette
+
+### Engineering
+
+- All shader programs precompile behind the intro overlay: no mid-session compile stalls
+- Allocation-free render loop; resizes and geometry rebuilds coalesce to one per frame
+- Adaptive quality lowers the pixel-ratio cap when the frame rate drops
+- WebGL context-loss recovery, full `destroy()` teardown, `prefers-reduced-motion` support
+- Supersampled screenshot capture, background-tab audio suspension
+
+## Physics model
+
+The scene uses geometric units with rs = 0.5 world units. Every scale derives from that number:
 
 | Quantity | Relation | World units |
 | --- | --- | --- |
 | Photon sphere | 1.5 rs | 0.75 |
 | Shadow radius | √27/2 · rs | ≈ 1.30 |
-| ISCO / disc inner edge | 3 rs | 1.5 |
-| Orbital speed at radius r | β = √(rs / 2r) | 0.41 c at ISCO |
+| ISCO / disc inner edge | 3 rs (a = 0) | 1.5 |
+| Orbital speed at radius r | β = √(rs / 2r) | 0.41c at the ISCO |
 
-The disc fragment shader advects four octaves of periodic perlin noise with the local Keplerian angular velocity, split into a rigid rotation plus a bounded, flow-map-crossfaded differential shear so the turbulence churns forever without winding into static filaments, while a radial drift keeps the plasma visibly falling inward. It then applies the relativistic Doppler factor δ = 1/γ(1 − β·cos θ) as a δ³ intensity boost with a spectral tilt, and the time-dilation factor √(1 − 3rs/2r) as dimming and reddening. The mass slider never rescales the scene, Schwarzschild geometry is scale-free, it drives the real-unit readouts in the HUD instead.
+The disc fragment shader advects four octaves of periodic Perlin noise with the local Keplerian angular velocity. The rotation is split into a rigid component and a bounded, flow-map-crossfaded differential shear, so the turbulence keeps churning at any runtime instead of winding into static filaments, while a radial drift keeps the plasma visibly falling inward. The relativistic Doppler factor δ = 1/[γ(1 − β cos θ)] is applied as a δ³ intensity boost with a spectral tilt, and the time-dilation factor √(1 − 3rs/2r) as dimming and reddening. The mass slider never rescales the scene, since Schwarzschild geometry is scale free; it drives the real-unit readouts in the HUD instead.
 
-The lensing is a screen-space approximation: two masks (a camera-facing halo and an in-plane disc field) are rendered to a deflection buffer, and the composition pass bends sample coordinates toward the singularity's projected position with that strength, cheap enough for any GPU, convincing enough to smear the star field around the shadow.
+In real-time mode the lensing is a screen-space approximation: two masks are rendered to a deflection buffer and the composition pass bends sample coordinates toward the singularity with that strength. In geodesic photo mode the approximation is replaced entirely by per-pixel integration of the metric.
 
-## 🗂 Project structure
+## Gallery
+
+Edge-on and top-down views:
+
+| Edge-on | Top-down |
+| --- | --- |
+| ![Edge-on view](./docs/screenshots/edge-on.jpg) | ![Top-down view](./docs/screenshots/top-down.jpg) |
+
+Gargantua palette at spin a = 0.9. The ISCO drops to 1.16 rs and the disc hugs the shadow:
+
+<img src="./docs/screenshots/gargantua.jpg" alt="Gargantua palette at spin 0.9" width="100%" />
+
+Geodesic photo mode. The far side of the disc arcs over and under the shadow exactly as general relativity predicts:
+
+<img src="./docs/screenshots/geodesic.jpg" alt="Geodesic photo mode" width="100%" />
+
+Kerr metric at spin a = 0.9 in geodesic mode. The shadow shrinks, turns D-shaped with the flat edge on the approaching side, and a prograde photon arc appears inside it:
+
+<img src="./docs/screenshots/kerr.jpg" alt="Kerr geodesic mode at spin 0.9" width="100%" />
+
+The interface:
+
+<img src="./docs/screenshots/interface.jpg" alt="Control panel and observatory HUD" width="100%" />
+
+## Architecture
 
 ```
 sources/
 ├── index.js                 # entry
 ├── experience/
 │   ├── Experience.js        # orchestrator, render pipeline, post-processing
-│   ├── Physics.js           # Schwarzschild model + real-unit readouts
+│   ├── Physics.js           # Schwarzschild/Kerr model, real-unit readouts
 │   ├── Disc.js              # accretion disc (ISCO-truncated, palettes, hot spot)
-│   ├── BlackHole.js         # shadow + photon ring
-│   ├── Jets.js              # relativistic polar jets
-│   ├── TidalDisruption.js   # star infall, debris n-body, accretion flare
-│   ├── Stars.js             # blackbody starfield
-│   ├── Nebula.js            # procedural background dust
-│   ├── Noises.js            # baked perlin octaves render target
-│   ├── Distortion.js        # lensing deflection field
+│   ├── BlackHole.js         # shadow and photon ring
 │   ├── GeodesicView.js      # ray-marched photo mode
-│   ├── CameraRig.js         # orbit + presets + cinematic mode
+│   ├── TidalDisruption.js   # star infall, debris integration, accretion flare
+│   ├── Jets.js              # relativistic polar jets
+│   ├── Stars.js             # blackbody star field
+│   ├── Nebula.js            # procedural background dust
+│   ├── Noises.js            # baked Perlin octaves render target
+│   ├── Distortion.js        # screen-space lensing deflection field
+│   ├── CameraRig.js         # orbit controls, presets, cinematic mode
 │   ├── AmbientAudio.js      # WebAudio soundscape
-│   └── UI.js                # control panel, HUD, shortcuts
+│   ├── Inspector.js         # hover tooltips with live physics
+│   └── UI.js                # control panel, HUD, tour, science panel
 └── shaders/                 # all GLSL (disc, stars, photonRing, jet, nebula,
-                             # distortion, composition, film, noises)
+                             # geodesic, distortion, composition, film, noises)
 ```
 
-## 👤 Author
+Each frame, the world renders into a color target and the deflection masks into a single-channel target; the composition pass applies the lensing and chromatic aberration, then bloom and a film pass complete the pipeline. In geodesic mode the composition inputs are replaced by the ray-marching quad, and bloom and film still apply.
 
-**ibra-kdbra**: shader breakdowns live in [`sources/shaders/README.md`](./sources/shaders/README.md)
+## Performance
+
+The render loop allocates no objects, shader programs are compiled up front while the intro overlay covers the canvas, resize bursts and spin-driven geometry rebuilds are coalesced to one per frame, and the default quality mode adapts resolution to the measured frame rate. A complete `destroy()` releases every geometry, material, texture, render target and listener.
+
+## References
+
+1. J. M. Bardeen, W. H. Press, S. A. Teukolsky (1972). Rotating black holes: locally nonrotating frames, energy extraction, and scalar synchrotron radiation. *ApJ* 178.
+2. N. I. Shakura, R. A. Sunyaev (1973). Black holes in binary systems: observational appearance. *A&A* 24.
+3. J.-P. Luminet (1979). Image of a spherical black hole with thin accretion disk. *A&A* 75.
+4. R. D. Blandford, R. L. Znajek (1977). Electromagnetic extraction of energy from Kerr black holes. *MNRAS* 179.
+5. O. James, E. von Tunzelmann, P. Franklin, K. S. Thorne (2015). Gravitational lensing by spinning black holes in astrophysics, and in the movie Interstellar. *CQG* 32.
+6. GRAVITY Collaboration (2018). Detection of orbital motions near the last stable circular orbit of the massive black hole Sgr A*. *A&A* 618.
+7. Event Horizon Telescope Collaboration (2019). First M87 Event Horizon Telescope results. *ApJL* 875.
+
+## Author
+
+**ibra-kdbra**
+
+Shader notes are available in [`sources/shaders/README.md`](./sources/shaders/README.md).
