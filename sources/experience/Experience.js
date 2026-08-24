@@ -12,6 +12,7 @@ import Disc from './Disc.js'
 import BlackHole from './BlackHole.js'
 import Jets from './Jets.js'
 import Distortion from './Distortion.js'
+import TidalDisruption from './TidalDisruption.js'
 import CameraRig from './CameraRig.js'
 import AmbientAudio from './AmbientAudio.js'
 import UI from './UI.js'
@@ -95,6 +96,7 @@ export default class Experience
         this.blackHole = new BlackHole(this)
         this.jets = new Jets(this)
         this.distortion = new Distortion(this)
+        this.tidal = new TidalDisruption(this)
         this.cameraRig = new CameraRig(this)
         this.audio = new AmbientAudio(this)
 
@@ -132,6 +134,8 @@ export default class Experience
 
     get pixelRatio()
     {
+        if(this.forcedPixelRatio) return this.forcedPixelRatio
+
         const cap = this.params.quality === 'auto'
             ? this.autoPixelCap
             : ({ low: 1, medium: 1.5, high: 2 }[this.params.quality] ?? 2)
@@ -342,17 +346,44 @@ export default class Experience
         this.screenshotRequested = true
     }
 
+    /**
+     * Supersampled capture: re-render one frame at double the pixel ratio
+     * (up to 3x), read it synchronously, then restore
+     */
     saveScreenshot()
     {
-        this.canvas.toBlob((blob) =>
-        {
-            if(!blob) return
-            const link = document.createElement('a')
-            link.href = URL.createObjectURL(blob)
-            link.download = `black-hole-${Date.now()}.png`
-            link.click()
-            URL.revokeObjectURL(link.href)
-        })
+        this.forcedPixelRatio = Math.min(3, this.renderer.getPixelRatio() * 2)
+        this.resize()
+        this.renderPipeline()
+        const dataUrl = this.canvas.toDataURL('image/png')
+        this.forcedPixelRatio = null
+        this.resize()
+
+        const link = document.createElement('a')
+        link.href = dataUrl
+        link.download = `black-hole-${Date.now()}.png`
+        link.click()
+    }
+
+    /**
+     * The full frame: world into the default target, deflection field into
+     * the distortion target, then composition + post to the canvas
+     */
+    renderPipeline()
+    {
+        const camera = this.cameraRig.camera
+
+        this.renderer.setRenderTarget(this.composition.defaultRenderTarget)
+        this.renderer.setClearColor('#130e16')
+        this.renderer.render(this.scene, camera)
+        this.renderer.setRenderTarget(null)
+
+        this.renderer.setRenderTarget(this.composition.distortionRenderTarget)
+        this.renderer.setClearColor('#000000')
+        this.renderer.render(this.distortion.scene, camera)
+        this.renderer.setRenderTarget(null)
+
+        this.composer.render()
     }
 
     tick()
@@ -368,6 +399,7 @@ export default class Experience
         this.cameraRig.update(delta, this.time)
         this.stars.update(this.time)
         this.nebula.update(this.time)
+        this.tidal.update(this.params.paused ? 0 : delta, this.time)
         this.disc.update(this.time)
         this.blackHole.update(camera)
         this.jets.update(this.time)
@@ -383,27 +415,14 @@ export default class Experience
         this.composition.plane.material.uniforms.uLensing.value = this.params.lensing
         this.composition.plane.material.uniforms.uAberration.value = this.params.aberration
 
-        this.bloomPass.strength = this.params.bloomStrength
+        this.bloomPass.strength = this.params.bloomStrength + this.tidal.flare * 0.25
         this.bloomPass.radius = this.params.bloomRadius
         this.bloomPass.threshold = this.params.bloomThreshold
         this.filmPass.uniforms.uTime.value = this.time
         this.filmPass.uniforms.uGrain.value = this.params.grain
         this.filmPass.uniforms.uVignette.value = this.params.vignette
 
-        // Render default scene
-        this.renderer.setRenderTarget(this.composition.defaultRenderTarget)
-        this.renderer.setClearColor('#130e16')
-        this.renderer.render(this.scene, camera)
-        this.renderer.setRenderTarget(null)
-
-        // Render distortion scene
-        this.renderer.setRenderTarget(this.composition.distortionRenderTarget)
-        this.renderer.setClearColor('#000000')
-        this.renderer.render(this.distortion.scene, camera)
-        this.renderer.setRenderTarget(null)
-
-        // Render composition + post
-        this.composer.render()
+        this.renderPipeline()
 
         if(this.screenshotRequested)
         {

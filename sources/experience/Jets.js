@@ -53,7 +53,10 @@ export default class Jets
         const camera = this.experience.cameraRig.camera
         const alongAxis = Math.abs(camera.position.clone().normalize().y)
         const axisFade = 1 - THREE.MathUtils.smoothstep(alongAxis, 0.72, 0.95)
-        this.material.uniforms.uIntensity.value = params.jetIntensity * axisFade
+
+        // Jets brighten while a tidal disruption feeds the hole
+        const flare = this.experience.tidal?.flare ?? 0
+        this.material.uniforms.uIntensity.value = params.jetIntensity * axisFade * (1 + flare)
 
         // Slow jet precession
         this.group.rotation.x = Math.sin(time * 0.05) * 0.06

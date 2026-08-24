@@ -114,7 +114,10 @@ export default class Disc
         uniforms.uDoppler.value = params.doppler
         uniforms.uRedshift.value = params.redshift
         uniforms.uTurbulence.value = params.turbulence
-        uniforms.uBrightness.value = params.brightness
+
+        // A tidal disruption flare stokes the whole disc
+        const flare = this.experience.tidal?.flare ?? 0
+        uniforms.uBrightness.value = params.brightness * (1 + flare * 1.2)
 
         // Hot spot: ride the (Kepler + frame dragging) flow just outside the
         // inner edge, kept clear of the shadow, breathing slowly
