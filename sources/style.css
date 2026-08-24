@@ -104,6 +104,43 @@ canvas.webgl
     color: var(--text-dim);
 }
 
+.ui-star-link
+{
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 12px;
+    padding: 6px 14px;
+    pointer-events: auto;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: var(--accent-soft);
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease, transform 0.15s ease;
+}
+
+.ui-star-link:hover
+{
+    color: var(--text);
+    border-color: var(--accent);
+    box-shadow: 0 0 20px rgba(255, 86, 0, 0.4);
+    transform: translateY(-1px);
+}
+
+.ui-star-link-icon
+{
+    color: var(--accent);
+    font-size: 12px;
+    text-shadow: 0 0 8px rgba(255, 86, 0, 0.8);
+}
+
 .ui-fps
 {
     margin-top: 10px;
