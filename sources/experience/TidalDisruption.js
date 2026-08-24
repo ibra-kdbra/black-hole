@@ -2,6 +2,9 @@ import * as THREE from 'three'
 import debrisVertex from '../shaders/tdeDebris/vertex.glsl'
 import debrisFragment from '../shaders/tdeDebris/fragment.glsl'
 
+const _stretchDirection = new THREE.Vector3()
+const _xAxis = new THREE.Vector3(1, 0, 0)
+
 /**
  * Tidal disruption event. A star falls in on a parabolic orbit; when it
  * crosses the tidal radius it is torn into a debris cloud whose particles
@@ -190,8 +193,8 @@ export default class TidalDisruption
             const stretch = Math.min(6, Math.pow(this.tidalRadius / this.starPosition.length(), 3))
             if(stretch > 1)
             {
-                const direction = this.starVelocity.clone().normalize()
-                this.star.quaternion.setFromUnitVectors(new THREE.Vector3(1, 0, 0), direction)
+                _stretchDirection.copy(this.starVelocity).normalize()
+                this.star.quaternion.setFromUnitVectors(_xAxis, _stretchDirection)
                 this.star.scale.set(stretch, 1 / Math.sqrt(stretch), 1 / Math.sqrt(stretch))
             }
         }

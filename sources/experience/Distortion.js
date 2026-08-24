@@ -4,6 +4,8 @@ import distortionHoleFragment from '../shaders/distortionHole/fragment.glsl'
 import distortionDiscVertex from '../shaders/distortionDisc/vertex.glsl'
 import distortionDiscFragment from '../shaders/distortionDisc/fragment.glsl'
 
+const _cameraDirection = new THREE.Vector3()
+
 /**
  * Screen-space gravitational lensing mask. A camera-facing plane around the
  * hole and a plane lying in the disc encode a deflection-strength field that
@@ -52,7 +54,7 @@ export default class Distortion
 
         // The in-plane field projects to a hard-edged sliver when the camera
         // grazes the disc plane - fade it out at shallow elevations
-        const elevation = Math.abs(camera.position.clone().normalize().y)
+        const elevation = Math.abs(_cameraDirection.copy(camera.position).normalize().y)
         this.disc.material.uniforms.uFade.value = THREE.MathUtils.smoothstep(elevation, 0.06, 0.22)
     }
 }
