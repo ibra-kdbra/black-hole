@@ -13,6 +13,7 @@ import BlackHole from './BlackHole.js'
 import Jets from './Jets.js'
 import Distortion from './Distortion.js'
 import TidalDisruption from './TidalDisruption.js'
+import GeodesicView from './GeodesicView.js'
 import CameraRig from './CameraRig.js'
 import AmbientAudio from './AmbientAudio.js'
 import UI from './UI.js'
@@ -46,6 +47,7 @@ export default class Experience
             audioVolume: 0.5,
 
             // Lensing / post
+            geodesic: false,           // ray-marched photo mode
             lensing: 1,
             aberration: 0.8,
             bloomStrength: 0.5,
@@ -98,6 +100,7 @@ export default class Experience
         this.distortion = new Distortion(this)
         this.tidal = new TidalDisruption(this)
         this.cameraRig = new CameraRig(this)
+        this.geodesic = new GeodesicView(this)
         this.audio = new AmbientAudio(this)
 
         this.setComposition()
@@ -371,6 +374,20 @@ export default class Experience
      */
     renderPipeline()
     {
+        if(this.params.geodesic)
+        {
+            // Photo mode: the ray marcher replaces the raster scene and the
+            // screen-space lensing; bloom and the film pass still apply
+            this.geodesic.update(this.time)
+            this.renderPass.scene = this.geodesic.scene
+            this.renderPass.camera = this.geodesic.camera
+            this.composer.render()
+            return
+        }
+
+        this.renderPass.scene = this.composition.scene
+        this.renderPass.camera = this.composition.camera
+
         const camera = this.cameraRig.camera
 
         this.renderer.setRenderTarget(this.composition.defaultRenderTarget)
