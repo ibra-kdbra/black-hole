@@ -179,11 +179,18 @@ export default class Experience
 
     setRenderer()
     {
+        // three r152+ enables sRGB color management by default, which would
+        // shift every tuned color and gradient in the custom pipeline. The
+        // scene authors its own look in linear values end to end, so keep
+        // the legacy behavior explicitly.
+        THREE.ColorManagement.enabled = false
+
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.canvas,
             antialias: true,
             powerPreference: 'high-performance'
         })
+        this.renderer.outputColorSpace = THREE.LinearSRGBColorSpace
         this.renderer.setClearColor('#130e16')
         this.renderer.setPixelRatio(this.pixelRatio)
         this.renderer.setSize(this.sizes.width, this.sizes.height)
