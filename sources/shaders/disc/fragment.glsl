@@ -30,14 +30,39 @@ void main() {
   float M = 0.5 * uSchwarzschildRadius;
   float r3 = radius * radius * radius;
   float omega = sqrt(M / r3) + uSpin * 2.0 * M * M / r3;
-  float azimuthShift = omega * uTime * uFlowSpeed / 6.2831853;
 
-  vec2 flowUv = vec2(vUv.x - azimuthShift, vUv.y);
-  float noise1 = texture(uNoisesTexture, vec2(flowUv.x * 1.0, flowUv.y - uTime * 0.010)).r;
-  float noise2 = texture(uNoisesTexture, vec2(flowUv.x * 2.0, flowUv.y - uTime * 0.008)).g;
-  float noise3 = texture(uNoisesTexture, vec2(flowUv.x * 1.0, flowUv.y - uTime * 0.006)).b;
-  float noise4 = texture(uNoisesTexture, vec2(flowUv.x * 2.0, flowUv.y - uTime * 0.004)).a;
-  vec4 noiseVector = vec4(noise1, noise2, noise3, noise4);
+  // Split the rotation into a rigid part (wraps forever, no artifacts) and
+  // the differential shear. Unbounded shear would slowly wind the pattern
+  // into frozen filaments, so two half-offset shear phases are crossfaded
+  // flow-map style: churn stays turbulent at any runtime. The radial drift
+  // keeps the plasma visibly falling inward, like the original scene.
+  float rRef = mix(uInnerRadius, uOuterRadius, 0.3);
+  float omegaRef = sqrt(M / (rRef * rRef * rRef)) + uSpin * 2.0 * M * M / (rRef * rRef * rRef);
+  float rigid = omegaRef * uTime;
+  float shear = omega - omegaRef;
+
+  float cycle = 36.0;
+  float t = uTime / cycle;
+  float offsetA = (fract(t) - 0.5) * cycle;
+  float offsetB = (fract(t + 0.5) - 0.5) * cycle;
+  float weightB = abs(2.0 * fract(t) - 1.0);
+
+  float shiftA = (rigid + shear * offsetA) * uFlowSpeed / 6.2831853;
+  float shiftB = (rigid + shear * offsetB) * uFlowSpeed / 6.2831853;
+
+  float inflow = uTime * uFlowSpeed;
+  vec4 noiseA = vec4(
+    texture(uNoisesTexture, vec2((vUv.x - shiftA) * 1.0, vUv.y - inflow * 0.050)).r,
+    texture(uNoisesTexture, vec2((vUv.x - shiftA) * 2.0, vUv.y - inflow * 0.040)).g,
+    texture(uNoisesTexture, vec2((vUv.x - shiftA) * 1.0, vUv.y - inflow * 0.030)).b,
+    texture(uNoisesTexture, vec2((vUv.x - shiftA) * 2.0, vUv.y - inflow * 0.020)).a);
+  vec4 noiseB = vec4(
+    texture(uNoisesTexture, vec2((vUv.x - shiftB) * 1.0, vUv.y - inflow * 0.050)).r,
+    texture(uNoisesTexture, vec2((vUv.x - shiftB) * 2.0, vUv.y - inflow * 0.040)).g,
+    texture(uNoisesTexture, vec2((vUv.x - shiftB) * 1.0, vUv.y - inflow * 0.030)).b,
+    texture(uNoisesTexture, vec2((vUv.x - shiftB) * 2.0, vUv.y - inflow * 0.020)).a);
+
+  vec4 noiseVector = mix(noiseA, noiseB, weightB);
   float noiseLength = length(noiseVector);
 
   // Radial falloffs (soft outer fade, sharp truncation at the ISCO)
