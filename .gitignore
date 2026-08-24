@@ -1,4 +1,4 @@
 # ignore the following
 node_modules
 dist
-.claude/
+.claude/settings.local.json

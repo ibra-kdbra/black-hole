@@ -1,0 +1,15 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/setup-signing.sh 2>/dev/null || true",
+            "statusMessage": "Configuring commit signing"
+          }
+        ]
+      }
+    ]
+  }
+}
