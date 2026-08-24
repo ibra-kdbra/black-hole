@@ -42,6 +42,7 @@ Everything on screen is generated procedurally in GLSL — there is not a single
 
 - **Cinematic camera system** — damped orbit controls, four named viewpoints with eased flight transitions (`1–4`), an autonomous cinematic drift mode (`C`), adjustable FOV, roll and handheld micro-shake
 - **Guided tour** — press `G` for a narrated flight through the physics: shadow, photon ring, beaming, ISCO, frame dragging… ending with a star being torn apart
+- **Hover inspector** — rest the pointer on anything and get live physics for that exact spot: the disc's local radius in rₛ, orbital speed, temperature and whether that limb is beamed toward you; the shadow's real size for the chosen mass; the jets; a doomed star's stretching factor mid-plunge
 - **Custom glass UI** — dependency-free control panel for every physics, camera and film parameter, collapsible sections, keyboard shortcuts, help overlay
 - **Disc palette themes** — quasar (default), Gargantua amber, X-ray binary blue, ember
 - **Procedural nebula backdrop** — wispy interstellar dust drifting behind the starfield, still zero texture files
@@ -91,6 +92,7 @@ npm run build
 | Input | Action |
 | --- | --- |
 | drag / scroll | orbit and dolly around the singularity |
+| hover | live physics for whatever you point at |
 | `1` `2` `3` `4` | fly to overview / edge-on / top-down / close-up |
 | `C` | cinematic mode (autonomous drift) |
 | `G` | guided tour |

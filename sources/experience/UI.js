@@ -350,6 +350,7 @@ export default class UI
 
         this.paramSlider(cameraSection, 'Field of view', 'fov', 20, 90, 1, (v) => `${Math.round(v)}°`)
         this.paramSlider(cameraSection, 'Camera roll', 'roll', -0.8, 0.8, 0.01, (v) => `${Math.round(v * 180 / Math.PI)}°`)
+        this.paramToggle(cameraSection, 'Hover info', 'inspect')
         this.paramToggle(cameraSection, 'Handheld shake', 'shake')
         this.paramSlider(cameraSection, 'Shake amount', 'shakeAmplitude', 0, 0.4, 0.005)
 
@@ -424,6 +425,7 @@ export default class UI
 
         const shortcuts = [
             ['drag', 'orbit around the singularity'],
+            ['hover', 'live physics for what you point at'],
             ['scroll', 'dolly in / out'],
             ['1 – 4', 'camera presets'],
             ['C', 'cinematic mode'],

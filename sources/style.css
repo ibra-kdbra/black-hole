@@ -496,6 +496,59 @@ canvas.webgl
 }
 
 /* ------------------------------------------------------------------ */
+/* Hover inspector                                                     */
+/* ------------------------------------------------------------------ */
+
+.ui-inspect
+{
+    position: fixed;
+    top: 0;
+    left: 0;
+    max-width: 240px;
+    padding: 9px 13px 10px;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    z-index: 20;
+}
+
+.ui-inspect.is-visible
+{
+    opacity: 1;
+}
+
+.ui-inspect-title
+{
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--accent-soft);
+    margin-bottom: 5px;
+}
+
+.ui-inspect-body
+{
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.45;
+    color: var(--text);
+}
+
+.ui-inspect-body span:nth-child(2)
+{
+    color: var(--text-dim);
+}
+
+/* ------------------------------------------------------------------ */
 /* Science panel                                                       */
 /* ------------------------------------------------------------------ */
 
