@@ -22,7 +22,7 @@ export default class TidalDisruption
         this.GM = 2.5
         this.spawnRadius = 8
         this.periapsis = 2.0
-        this.tidalRadius = 2.6
+        this.tidalRadius = 3.4
         this.absorbRadius = experience.physics.shadowRadius * 1.05
         this.escapeRadius = 90
         this.count = 4500
@@ -35,7 +35,7 @@ export default class TidalDisruption
         // The doomed star: a plain bright sphere - the bloom pass gives it
         // its glow, tidal stretching gives it its death
         this.star = new THREE.Mesh(
-            new THREE.SphereGeometry(0.16, 16, 16),
+            new THREE.SphereGeometry(0.2, 16, 16),
             new THREE.MeshBasicMaterial({ color: '#fff6e5' })
         )
         this.star.visible = false
@@ -57,7 +57,10 @@ export default class TidalDisruption
         }
 
         this.geometry = new THREE.BufferGeometry()
-        this.geometry.setAttribute('position', new THREE.Float32BufferAttribute(this.positions, 3))
+        // BufferAttribute (not Float32BufferAttribute) wraps the array
+        // without copying, so the physics loop writes straight into what
+        // the GPU uploads
+        this.geometry.setAttribute('position', new THREE.BufferAttribute(this.positions, 3))
         this.geometry.setAttribute('aSeed', new THREE.Float32BufferAttribute(seeds, 1))
 
         this.material = new THREE.ShaderMaterial({
@@ -84,7 +87,7 @@ export default class TidalDisruption
     trigger()
     {
         const azimuth = Math.random() * Math.PI * 2
-        const inclination = (0.25 + Math.random() * 0.35) * (Math.random() < 0.5 ? -1 : 1)
+        const inclination = (0.55 + Math.random() * 0.3) * (Math.random() < 0.5 ? -1 : 1)
 
         const direction = new THREE.Vector3(
             Math.cos(inclination) * Math.cos(azimuth),
