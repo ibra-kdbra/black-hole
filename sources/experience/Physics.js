@@ -45,6 +45,18 @@ export default class Physics
     }
 
     /**
+     * Inner edge of the raster disc mesh. Physically the ISCO, but clamped
+     * to stay just outside the shadow sphere: at high spin the ISCO moves
+     * inside the apparent shadow, and a flat mesh slicing through the
+     * opaque sphere z-fights along the intersection circle. The geodesic
+     * marcher keeps the true ISCO - it handles the geometry for real.
+     */
+    get discInnerRadius()
+    {
+        return Math.max(this.iscoRadius, this.shadowRadius * 1.05)
+    }
+
+    /**
      * Apparent shadow radius: sqrt(27)/2 rs for Schwarzschild, mildly
      * shrinking with prograde spin (first-order approximation of the
      * Kerr shadow's mean radius).
