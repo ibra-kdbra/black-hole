@@ -220,6 +220,25 @@ export default class UI
         this.header = this.el('header', 'ui-header', this.root)
         this.el('h1', 'ui-title', this.header, 'BLACK HOLE')
         this.el('p', 'ui-subtitle', this.header, 'a relativistic visualization')
+
+        // The star link lives under the title, where every visitor looks
+        // first - with the live count when the GitHub API answers
+        this.starLink = this.el('a', 'ui-star-link', this.header)
+        this.starLink.href = 'https://github.com/ibra-kdbra/black-hole'
+        this.starLink.target = '_blank'
+        this.starLink.rel = 'noopener'
+        this.el('span', 'ui-star-link-icon', this.starLink, '★')
+        this.starLabel = this.el('span', null, this.starLink, 'Star on GitHub')
+
+        fetch('https://api.github.com/repos/ibra-kdbra/black-hole')
+            .then((response) => response.ok ? response.json() : null)
+            .then((data) =>
+            {
+                if(data?.stargazers_count !== undefined)
+                    this.starLabel.textContent = `Star on GitHub · ${data.stargazers_count}`
+            })
+            .catch(() => {})
+
         this.fpsNode = this.el('div', 'ui-fps', this.header, '— fps')
     }
 
@@ -239,7 +258,6 @@ export default class UI
         button('✦', 'Screenshot [S]', () => this.experience.requestScreenshot())
         button('⧉', 'Copy a link to this exact view', () => this.experience.copyShareLink())
         button('Σ', 'The science inside [I]', () => this.scienceOverlay.classList.toggle('is-open'))
-        button('★', 'Star the project on GitHub', () => window.open('https://github.com/ibra-kdbra/black-hole', '_blank', 'noopener'))
         button('↺', 'Reset all settings', () => this.experience.reset())
         button('⛶', 'Fullscreen [F]', () => this.toggleFullscreen())
         button('?', 'Help [K]', () => this.helpOverlay.classList.toggle('is-open'))
