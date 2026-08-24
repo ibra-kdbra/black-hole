@@ -302,6 +302,9 @@ export default class UI
         // --- Lensing & post --------------------------------------------
         const postSection = this.section('Lensing & film', false)
 
+        this.paramToggle(postSection, 'Geodesic lens', 'geodesic')
+        this.el('div', 'ui-group-label', postSection, 'ray-marched photo mode · heavy on old GPUs')
+
         this.paramSlider(postSection, 'Lensing', 'lensing', 0, 2, 0.01)
         this.paramSlider(postSection, 'Aberration', 'aberration', 0, 2.5, 0.01)
         this.paramSlider(postSection, 'Bloom', 'bloomStrength', 0, 2, 0.01)
@@ -372,6 +375,7 @@ export default class UI
             ['C', 'cinematic mode'],
             ['G', 'guided tour'],
             ['T', 'feed a star to the hole'],
+            ['P', 'geodesic photo mode'],
             ['Space', 'pause time'],
             ['S', 'save screenshot'],
             ['F', 'fullscreen'],
@@ -484,6 +488,10 @@ export default class UI
                 case 's': this.experience.requestScreenshot(); break
                 case 'c': this.toggleCinematic(); break
                 case 't': this.experience.tidal.trigger(); break
+                case 'p':
+                    this.params.geodesic = !this.params.geodesic
+                    this.syncControls()
+                    break
                 case 'g': this.toggleTour(); break
                 case 'k': this.helpOverlay.classList.toggle('is-open'); break
                 case '1': this.experience.cameraRig.flyTo('overview'); break
