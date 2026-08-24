@@ -220,10 +220,20 @@ export default class UI
         this.header = this.el('header', 'ui-header', this.root)
         this.el('h1', 'ui-title', this.header, 'BLACK HOLE')
         this.el('p', 'ui-subtitle', this.header, 'a relativistic visualization')
+        this.fpsNode = this.el('div', 'ui-fps', this.header, '— fps')
 
-        // The star link lives under the title, where every visitor looks
-        // first - with the live count when the GitHub API answers
-        this.starLink = this.el('a', 'ui-star-link', this.header)
+        this.setStarLink()
+    }
+
+    /**
+     * The star call-to-action anchors the empty bottom-right corner: every
+     * other corner is taken (title, actions + panel, HUD, playback), so it
+     * stays permanently visible without competing with the hero title.
+     * Shows the live count when the GitHub API answers.
+     */
+    setStarLink()
+    {
+        this.starLink = this.el('a', 'ui-star-link', this.root)
         this.starLink.href = 'https://github.com/ibra-kdbra/black-hole'
         this.starLink.target = '_blank'
         this.starLink.rel = 'noopener'
@@ -238,8 +248,6 @@ export default class UI
                     this.starLabel.textContent = `Star on GitHub · ${data.stargazers_count}`
             })
             .catch(() => {})
-
-        this.fpsNode = this.el('div', 'ui-fps', this.header, '— fps')
     }
 
     setActions()

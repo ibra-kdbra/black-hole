@@ -106,11 +106,13 @@ canvas.webgl
 
 .ui-star-link
 {
+    position: absolute;
+    right: 32px;
+    bottom: 30px;
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    margin-top: 12px;
-    padding: 6px 14px;
+    padding: 7px 15px;
     pointer-events: auto;
     font-size: 10.5px;
     font-weight: 600;
@@ -871,5 +873,11 @@ canvas.webgl
     {
         top: 18px;
         right: 20px;
+    }
+
+    .ui-star-link
+    {
+        right: 20px;
+        bottom: 20px;
     }
 }
