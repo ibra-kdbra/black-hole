@@ -43,6 +43,7 @@ export default class CameraRig
         experience.canvas.addEventListener('pointerdown', () =>
         {
             this.flight = null
+            this.controls.enabled = true
             this.experience.params.cinematic = false
             if(this.experience.ui) this.experience.ui.syncControls()
         })
@@ -66,6 +67,10 @@ export default class CameraRig
         // Take the short way around
         let deltaTheta = preset.theta - from.theta
         deltaTheta = Math.atan2(Math.sin(deltaTheta), Math.cos(deltaTheta))
+
+        // The controls must not fight the flight - and their damped state
+        // must not replay a stale fling when the flight lands
+        this.controls.enabled = false
 
         this.flight = {
             progress: 0,
@@ -106,6 +111,7 @@ export default class CameraRig
             if(this.flight.progress >= 1)
             {
                 this.flight = null
+                this.controls.enabled = true
                 if(this.experience.ui) this.experience.ui.syncControls()
             }
         }

@@ -113,7 +113,41 @@ export default class Experience
         // Console access for tinkerers
         window.experience = this
 
-        window.addEventListener('resize', () => this.resize())
+        // Reused across frames - the render loop allocates nothing
+        this.screenPosition = new THREE.Vector3()
+        this.rafId = 0
+        this.resizeQueued = false
+
+        this.onResize = () =>
+        {
+            // Coalesce bursts of resize events into one reallocation per frame
+            if(this.resizeQueued) return
+            this.resizeQueued = true
+            window.requestAnimationFrame(() =>
+            {
+                this.resizeQueued = false
+                this.resize()
+            })
+        }
+        window.addEventListener('resize', this.onResize)
+
+        this.onVisibilityChange = () =>
+        {
+            if(document.hidden)
+            {
+                // rAF already stops in background tabs; also quiet the audio
+                if(this.audio.context?.state === 'running') this.audio.context.suspend()
+            }
+            else
+            {
+                // Flush the hidden interval so nothing jumps on return
+                this.clock.getDelta()
+                if(this.params.audio) this.audio.setEnabled(true)
+            }
+        }
+        document.addEventListener('visibilitychange', this.onVisibilityChange)
+
+        this.warmup()
 
         this.tick = this.tick.bind(this)
         this.tick()
@@ -128,7 +162,8 @@ export default class Experience
     {
         this.renderer = new THREE.WebGLRenderer({
             canvas: this.canvas,
-            antialias: true
+            antialias: true,
+            powerPreference: 'high-performance'
         })
         this.renderer.setClearColor('#130e16')
         this.renderer.setPixelRatio(this.pixelRatio)
@@ -232,6 +267,68 @@ export default class Experience
             fragmentShader: filmFragment
         })
         this.composer.addPass(this.filmPass)
+    }
+
+    /**
+     * Compile every shader program up front, while the intro overlay still
+     * covers the canvas. Materials otherwise compile lazily on their first
+     * draw - which used to mean a visible stall the first time a tidal
+     * disruption fired or geodesic mode was toggled (and mid-tour hitches).
+     */
+    warmup()
+    {
+        const camera = this.cameraRig.camera
+
+        this.tidal.points.visible = true
+        this.tidal.star.visible = true
+
+        this.renderer.compile(this.scene, camera)
+        this.renderer.compile(this.distortion.scene, camera)
+        this.renderer.compile(this.geodesic.scene, this.geodesic.camera)
+        this.renderer.compile(this.composition.scene, this.composition.camera)
+
+        this.tidal.points.visible = false
+        this.tidal.star.visible = false
+    }
+
+    /**
+     * Full teardown: stop the loop, release every GPU resource and remove
+     * all listeners. Makes the experience embeddable and hot-reload safe.
+     */
+    destroy()
+    {
+        window.cancelAnimationFrame(this.rafId)
+        window.removeEventListener('resize', this.onResize)
+        document.removeEventListener('visibilitychange', this.onVisibilityChange)
+
+        this.cameraRig.controls.dispose()
+        this.audio.context?.close()
+
+        for(const scene of [this.scene, this.distortion.scene, this.geodesic.scene, this.composition.scene, this.noises.scene])
+        {
+            scene.traverse((node) =>
+            {
+                node.geometry?.dispose()
+                if(node.material)
+                {
+                    for(const value of Object.values(node.material.uniforms ?? {}))
+                        value.value?.isTexture && value.value.dispose()
+                    node.material.dispose()
+                }
+            })
+        }
+
+        this.composition.defaultRenderTarget.dispose()
+        this.composition.distortionRenderTarget.dispose()
+        this.noises.renderTarget.dispose()
+        this.composer.renderTarget1.dispose()
+        this.composer.renderTarget2.dispose()
+        this.bloomPass.dispose?.()
+
+        this.renderer.dispose()
+        this.ui.root.remove()
+
+        if(window.experience === this) delete window.experience
     }
 
     resize()
@@ -424,7 +521,7 @@ export default class Experience
         this.audio.update(delta, this.cameraRig.distanceToSingularity)
 
         // Project the singularity to screen space for the lensing convergence
-        const screenPosition = new THREE.Vector3(0, 0, 0)
+        const screenPosition = this.screenPosition.set(0, 0, 0)
         screenPosition.project(camera)
         screenPosition.x = screenPosition.x * 0.5 + 0.5
         screenPosition.y = screenPosition.y * 0.5 + 0.5
@@ -449,6 +546,6 @@ export default class Experience
 
         this.ui.update(delta)
 
-        window.requestAnimationFrame(this.tick)
+        this.rafId = window.requestAnimationFrame(this.tick)
     }
 }

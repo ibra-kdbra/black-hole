@@ -2,6 +2,8 @@ import * as THREE from 'three'
 import jetVertex from '../shaders/jet/vertex.glsl'
 import jetFragment from '../shaders/jet/fragment.glsl'
 
+const _cameraDirection = new THREE.Vector3()
+
 /**
  * Relativistic polar jets - collimated plasma launched along the spin axis,
  * rendered as two open cones of scrolling noise with a slow precession.
@@ -51,7 +53,7 @@ export default class Jets
         // Fade the jets out when the camera looks down their axis, so the
         // cone doesn't read as a smudge over the shadow
         const camera = this.experience.cameraRig.camera
-        const alongAxis = Math.abs(camera.position.clone().normalize().y)
+        const alongAxis = Math.abs(_cameraDirection.copy(camera.position).normalize().y)
         const axisFade = 1 - THREE.MathUtils.smoothstep(alongAxis, 0.72, 0.95)
 
         // Jets brighten while a tidal disruption feeds the hole

@@ -64,10 +64,20 @@ export default class Disc
     }
 
     /**
+     * Coalesce rebuild requests (a slider drag fires dozens per second)
+     * into at most one geometry reallocation per frame
+     */
+    requestRebuild()
+    {
+        this.rebuildQueued = true
+    }
+
+    /**
      * Called when the spin slider moves the ISCO
      */
     rebuild()
     {
+        this.rebuildQueued = false
         this.mesh.geometry.dispose()
         this.mesh.geometry = this.buildGeometry()
         this.material.uniforms.uInnerRadius.value = this.experience.physics.iscoRadius
@@ -104,6 +114,8 @@ export default class Disc
 
     update(time)
     {
+        if(this.rebuildQueued) this.rebuild()
+
         const uniforms = this.material.uniforms
         const params = this.experience.params
         const physics = this.experience.physics
