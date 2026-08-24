@@ -1,3 +1,4 @@
 # ignore the following
 node_modules
 dist
+.claude/
