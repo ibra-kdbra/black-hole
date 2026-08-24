@@ -26,6 +26,7 @@ Everything on screen is generated procedurally in GLSL — there is not a single
 - **Keplerian differential rotation** — disc plasma is advected with ω = √(GM/r³); the inner edge visibly laps the outer disc, shearing the turbulence into trailing spirals
 - **Kerr spin** — drag the spin slider from Schwarzschild to near-extremal (a = 0.998): the ISCO follows the exact Bardeen–Press–Teukolsky formula (6M → 1.24M), so the disc reaches deeper, the plasma gets faster, Lense–Thirring frame dragging accelerates the flow, and the shadow tightens
 - **Orbiting hot-spot flare** — a compact flare riding the flow just outside the inner edge at its true angular velocity, beamed and shifted like the plasma around it (the kind of orbiting spot the GRAVITY interferometer tracked around Sgr A*)
+- **Geodesic photo mode** — press `P` and every pixel integrates a real null geodesic of the Schwarzschild metric backwards from the camera (d²x/dλ² = −3/2 rs h² x/r⁵): the shadow, the photon ring and the lensed arcs of the disc's far side above and below the hole all emerge from the geometry itself — nothing painted on. Bloom, grain and supersampled screenshots still apply
 - **Tidal disruption events** — press `T` and a star falls in on a parabolic orbit, stretches as it crosses the tidal radius, and is torn into 4 500 debris particles integrated with real gravity: about half escape, the rest rain back, circularize into the disc and feed an accretion flare that brightens the disc, the jets and the bloom before decaying away
 - **Relativistic Doppler beaming** — the approaching limb flares up (δ³ intensity boost) and blueshifts, the receding limb fades and reddens, from the actual orbital β = √(rs/2r) ≈ 0.41 c at the inner edge
 - **Gravitational redshift** — emission near the ISCO is dimmed and reddened by the combined orbital + gravitational time dilation √(1 − 3rs/2r)
@@ -58,6 +59,10 @@ Gargantua palette at spin a = 0.9 — the ISCO drops to 1.16 rs and the disc hug
 
 <img src="./docs/screenshots/gargantua.jpg" alt="Gargantua palette, spin 0.9" width="100%" />
 
+Geodesic photo mode (`P`) — the same disc, but every pixel ray-marches a true Schwarzschild null geodesic; the far side of the disc arcs over and under the shadow exactly as general relativity says it should:
+
+<img src="./docs/screenshots/geodesic.jpg" alt="Geodesic photo mode" width="100%" />
+
 <img src="./docs/screenshots/interface.jpg" alt="Interface" width="100%" />
 
 ## 🚀 Setup
@@ -81,6 +86,7 @@ npm run build
 | `1` `2` `3` `4` | fly to overview / edge-on / top-down / close-up |
 | `C` | cinematic mode (autonomous drift) |
 | `G` | guided tour |
+| `P` | geodesic photo mode |
 | `T` | feed a star to the hole |
 | `Space` | pause time |
 | `S` | save a supersampled PNG screenshot |
@@ -121,6 +127,7 @@ sources/
 │   ├── Nebula.js            # procedural background dust
 │   ├── Noises.js            # baked perlin octaves render target
 │   ├── Distortion.js        # lensing deflection field
+│   ├── GeodesicView.js      # ray-marched photo mode
 │   ├── CameraRig.js         # orbit + presets + cinematic mode
 │   ├── AmbientAudio.js      # WebAudio soundscape
 │   └── UI.js                # control panel, HUD, shortcuts
