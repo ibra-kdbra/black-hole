@@ -147,6 +147,22 @@ export default class Experience
         }
         document.addEventListener('visibilitychange', this.onVisibilityChange)
 
+        // If the GPU evicts us (driver reset, tab pressure), recover instead
+        // of freezing on a dead canvas
+        this.onContextLost = (event) =>
+        {
+            event.preventDefault()
+            this.ui.toast('Graphics context lost — recovering…')
+        }
+        this.onContextRestored = () =>
+        {
+            this.warmup()
+            this.resize()
+            this.ui.toast('Graphics context restored')
+        }
+        this.canvas.addEventListener('webglcontextlost', this.onContextLost)
+        this.canvas.addEventListener('webglcontextrestored', this.onContextRestored)
+
         this.warmup()
 
         this.tick = this.tick.bind(this)
@@ -300,6 +316,8 @@ export default class Experience
         window.cancelAnimationFrame(this.rafId)
         window.removeEventListener('resize', this.onResize)
         document.removeEventListener('visibilitychange', this.onVisibilityChange)
+        this.canvas.removeEventListener('webglcontextlost', this.onContextLost)
+        this.canvas.removeEventListener('webglcontextrestored', this.onContextRestored)
 
         this.cameraRig.controls.dispose()
         this.audio.context?.close()
@@ -422,7 +440,7 @@ export default class Experience
             {
                 const [radius, phi, theta] = state.cam.map(Number)
                 const spherical = new THREE.Spherical(
-                    THREE.MathUtils.clamp(radius, 2, 80),
+                    THREE.MathUtils.clamp(radius, 2, 30),
                     THREE.MathUtils.clamp(phi, 0.001, Math.PI - 0.001),
                     theta
                 )

@@ -34,7 +34,9 @@ export default class CameraRig
         this.controls.rotateSpeed = 0.6
         this.controls.enablePan = false
         this.controls.minDistance = 2.0
-        this.controls.maxDistance = 80
+        // Keep the hole the subject: at 30 units the whole disc still fills
+        // a third of the frame - any farther and the scene loses its focus
+        this.controls.maxDistance = 30
 
         this.flight = null
         this.spherical = new THREE.Spherical()
