@@ -26,6 +26,7 @@ Everything on screen is generated procedurally in GLSL — there is not a single
 - **Keplerian differential rotation** — disc plasma is advected with ω = √(GM/r³); the inner edge visibly laps the outer disc, shearing the turbulence into trailing spirals
 - **Kerr spin** — drag the spin slider from Schwarzschild to near-extremal (a = 0.998): the ISCO follows the exact Bardeen–Press–Teukolsky formula (6M → 1.24M), so the disc reaches deeper, the plasma gets faster, Lense–Thirring frame dragging accelerates the flow, and the shadow tightens
 - **Orbiting hot-spot flare** — a compact flare riding the flow just outside the inner edge at its true angular velocity, beamed and shifted like the plasma around it (the kind of orbiting spot the GRAVITY interferometer tracked around Sgr A*)
+- **Tidal disruption events** — press `T` and a star falls in on a parabolic orbit, stretches as it crosses the tidal radius, and is torn into 4 500 debris particles integrated with real gravity: about half escape, the rest rain back, circularize into the disc and feed an accretion flare that brightens the disc, the jets and the bloom before decaying away
 - **Relativistic Doppler beaming** — the approaching limb flares up (δ³ intensity boost) and blueshifts, the receding limb fades and reddens, from the actual orbital β = √(rs/2r) ≈ 0.41 c at the inner edge
 - **Gravitational redshift** — emission near the ISCO is dimmed and reddened by the combined orbital + gravitational time dilation √(1 − 3rs/2r)
 - **Photon ring** — a bright, thin ring of once-orbiting light hugging the shadow at √27/2 · rs, the correct lensed silhouette radius
@@ -38,6 +39,7 @@ Everything on screen is generated procedurally in GLSL — there is not a single
 **Experience**
 
 - **Cinematic camera system** — damped orbit controls, four named viewpoints with eased flight transitions (`1–4`), an autonomous cinematic drift mode (`C`), adjustable FOV, roll and handheld micro-shake
+- **Guided tour** — press `G` for a narrated flight through the physics: shadow, photon ring, beaming, ISCO, frame dragging… ending with a star being torn apart
 - **Custom glass UI** — dependency-free control panel for every physics, camera and film parameter, collapsible sections, keyboard shortcuts, help overlay
 - **Disc palette themes** — quasar (default), Gargantua amber, X-ray binary blue, ember
 - **Procedural nebula backdrop** — wispy interstellar dust drifting behind the starfield, still zero texture files
@@ -78,8 +80,10 @@ npm run build
 | drag / scroll | orbit and dolly around the singularity |
 | `1` `2` `3` `4` | fly to overview / edge-on / top-down / close-up |
 | `C` | cinematic mode (autonomous drift) |
+| `G` | guided tour |
+| `T` | feed a star to the hole |
 | `Space` | pause time |
-| `S` | save a PNG screenshot |
+| `S` | save a supersampled PNG screenshot |
 | `F` | fullscreen |
 | `H` | hide the interface |
 | `K` | shortcuts panel |
@@ -112,6 +116,7 @@ sources/
 │   ├── Disc.js              # accretion disc (ISCO-truncated, palettes, hot spot)
 │   ├── BlackHole.js         # shadow + photon ring
 │   ├── Jets.js              # relativistic polar jets
+│   ├── TidalDisruption.js   # star infall, debris n-body, accretion flare
 │   ├── Stars.js             # blackbody starfield
 │   ├── Nebula.js            # procedural background dust
 │   ├── Noises.js            # baked perlin octaves render target
