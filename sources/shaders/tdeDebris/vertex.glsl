@@ -20,5 +20,5 @@ void main() {
   // Quick ignition, slow dissolve
   vAlpha = smoothstep(0.0, 0.4, age) * (1.0 - smoothstep(28.0, 40.0, age));
 
-  gl_PointSize = (5.0 + aSeed * 8.0) * (1.0 + heat) * (12.0 / max(1.0, -mvPosition.z));
+  gl_PointSize = (7.0 + aSeed * 10.0) * (1.0 + heat) * (12.0 / max(1.0, -mvPosition.z));
 }
