@@ -133,8 +133,8 @@ export default class Inspector
                 // Doppler state of this limb, from the local flow direction
                 _toCamera.copy(experience.cameraRig.camera.position).sub(hit.point).normalize()
                 const approach = (hit.point.z * _toCamera.x - hit.point.x * _toCamera.z) / radius
-                const side = approach > 0.25 ? 'approaching — beamed toward you'
-                    : approach < -0.25 ? 'receding — Doppler-dimmed'
+                const side = approach > 0.25 ? 'approaching, beamed toward you'
+                    : approach < -0.25 ? 'receding, Doppler-dimmed'
                     : 'transverse flow'
 
                 this.show('Accretion disc', [
@@ -147,7 +147,7 @@ export default class Inspector
             if(object === experience.jets.up || object === experience.jets.down)
             {
                 const flare = experience.tidal.flare
-                const lines = ['spin energy flung out magnetically (Blandford–Znajek)']
+                const lines = ['spin energy flung out magnetically (Blandford-Znajek)']
                 if(flare > 0.05) lines.push(`flaring ×${(1 + flare).toFixed(2)} on infalling debris`)
                 this.show('Relativistic jet', lines)
                 return

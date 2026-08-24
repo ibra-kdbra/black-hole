@@ -155,7 +155,7 @@ export default class Experience
         this.onContextLost = (event) =>
         {
             event.preventDefault()
-            this.ui.toast('Graphics context lost — recovering…')
+            this.ui.toast('Graphics context lost, recovering…')
         }
         this.onContextRestored = () =>
         {

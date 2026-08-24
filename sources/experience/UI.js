@@ -6,12 +6,12 @@
 export default class UI
 {
     static TOUR = [
-        { preset: 'overview', text: 'This is a supermassive black hole — a region of spacetime wrapped so tightly that nothing, not even light, escapes the horizon.' },
+        { preset: 'overview', text: 'This is a supermassive black hole, a region of spacetime wrapped so tightly that nothing, not even light, escapes the horizon.' },
         { preset: 'close', text: 'The dark disc is the shadow: gravity lenses light around the horizon, casting a silhouette about 2.6× wider than the horizon itself.' },
-        { text: 'The thin bright edge is the photon ring — light that circled the hole, sometimes more than once, before escaping to your eye.' },
+        { text: 'The thin bright edge is the photon ring, light that circled the hole, sometimes more than once, before escaping to your eye.' },
         { preset: 'overview', text: 'The glowing spiral is the accretion disc: plasma sheared into million-degree streams, orbiting at almost half the speed of light near the inner edge.' },
         { preset: 'edge', text: 'One side outshines the other: relativistic Doppler beaming. The plasma racing toward you piles its light into your line of sight.' },
-        { preset: 'top', text: 'The disc ends abruptly at the ISCO — the innermost stable circular orbit. Inside it, matter has no stable path and plunges in.' },
+        { preset: 'top', text: 'The disc ends abruptly at the ISCO, the innermost stable circular orbit. Inside it, matter has no stable path and plunges in.' },
         {
             preset: 'overview',
             text: 'Spin the hole up and spacetime itself is dragged around with it: the stable orbits creep inward and the disc dives closer to the shadow.',
@@ -23,10 +23,10 @@ export default class UI
         },
         { preset: 'edge', text: 'Magnetic fields wound up by the spinning disc launch jets of plasma along the poles at relativistic speeds.' },
         {
-            text: 'And when a star wanders too close, tides tear it apart — half its debris escapes, half rains back as a blazing accretion flare.',
+            text: 'And when a star wanders too close, tides tear it apart: half its debris escapes, half rains back as a blazing accretion flare.',
             action: (experience) => experience.tidal.trigger()
         },
-        { preset: 'overview', text: 'Explore freely — every number in the panel is yours to bend.' }
+        { preset: 'overview', text: 'Explore freely, every number in the panel is yours to bend.' }
     ]
 
     constructor(experience)
@@ -202,7 +202,7 @@ export default class UI
 
     static sci(value, digits = 2)
     {
-        if(!isFinite(value)) return '—'
+        if(!isFinite(value)) return '-'
         if(value === 0) return '0'
         const exponent = Math.floor(Math.log10(Math.abs(value)))
         if(exponent >= -2 && exponent < 4)
@@ -220,7 +220,7 @@ export default class UI
         this.header = this.el('header', 'ui-header', this.root)
         this.el('h1', 'ui-title', this.header, 'BLACK HOLE')
         this.el('p', 'ui-subtitle', this.header, 'a relativistic visualization')
-        this.fpsNode = this.el('div', 'ui-fps', this.header, '— fps')
+        this.fpsNode = this.el('div', 'ui-fps', this.header, '- fps')
 
         this.setStarLink()
     }
@@ -427,7 +427,7 @@ export default class UI
             ['drag', 'orbit around the singularity'],
             ['hover', 'live physics for what you point at'],
             ['scroll', 'dolly in / out'],
-            ['1 – 4', 'camera presets'],
+            ['1 to 4', 'camera presets'],
             ['C', 'cinematic mode'],
             ['G', 'guided tour'],
             ['T', 'feed a star to the hole'],
@@ -464,26 +464,26 @@ export default class UI
             ['Schwarzschild radius', 'r<sub>s</sub> = 2GM/c²', 'sets every scale in the scene; km readout in the HUD'],
             ['Photon sphere', 'r<sub>ph</sub> = 1.5 r<sub>s</sub>', 'unstable circular light orbits'],
             ['Shadow radius', 'r<sub>sh</sub> = (√27/2) r<sub>s</sub> ≈ 2.6 r<sub>s</sub>', 'the lensed silhouette and the photon ring'],
-            ['ISCO (Kerr, prograde)', 'r = M[3 + Z₂ − √((3−Z₁)(3+Z₁+2Z₂))]', 'disc inner edge vs. spin — Bardeen, Press & Teukolsky'],
+            ['ISCO (Kerr, prograde)', 'r = M[3 + Z₂ − √((3−Z₁)(3+Z₁+2Z₂))]', 'disc inner edge vs. spin (Bardeen, Press & Teukolsky)'],
             ['Keplerian flow', 'Ω = √(GM/r³) &nbsp;·&nbsp; ω<sub>LT</sub> = 2GJ/c²r³', 'disc advection, frame dragging, hot-spot orbit'],
             ['Orbital speed', 'β = √(r<sub>s</sub>/2r) → 0.41c at 3 r<sub>s</sub>', 'plasma velocity for the Doppler terms'],
             ['Doppler beaming', 'δ = 1/[γ(1 − β cos θ)] &nbsp;·&nbsp; I ∝ δ³', 'the bright approaching limb, dim receding limb'],
             ['Gravitational redshift', 'ν<sub>obs</sub>/ν<sub>em</sub> = √(1 − 3r<sub>s</sub>/2r)', 'combined orbital + gravitational time dilation'],
-            ['Disc temperature', 'T ≈ 6.3×10⁷ K · (M/M<sub>☉</sub>)<sup>−1/4</sup>', 'thin-disc peak — Shakura & Sunyaev'],
+            ['Disc temperature', 'T ≈ 6.3×10⁷ K · (M/M<sub>☉</sub>)<sup>−1/4</sup>', 'thin-disc peak (Shakura & Sunyaev)'],
             ['Tidal radius', 'r<sub>t</sub> ≈ R<sub>★</sub> (M<sub>BH</sub>/M<sub>★</sub>)<sup>1/3</sup>', 'where a star is torn apart (press T)'],
-            ['Relativistic jets', 'P<sub>jet</sub> ∝ a² Φ² (Blandford–Znajek)', 'the polar plasma columns — spin energy extracted magnetically, like M87\u2019s jet'],
+            ['Relativistic jets', 'P<sub>jet</sub> ∝ a² Φ² (Blandford-Znajek)', 'the polar plasma columns: spin energy extracted magnetically, like M87\u2019s jet'],
             ['Null geodesics (photo mode)', 'd²x/dλ² = −(3/2) r<sub>s</sub> h² x/r⁵', 'Schwarzschild ray marching, h = |x×v| conserved'],
-            ['Kerr–Schild metric (photo mode)', 'g<sub>μν</sub> = η<sub>μν</sub> + f l<sub>μ</sub>l<sub>ν</sub> &nbsp;·&nbsp; H = ½[p² − E² − f(l·p+E)²]', 'spinning-hole rays as a Hamiltonian system']
+            ['Kerr-Schild metric (photo mode)', 'g<sub>μν</sub> = η<sub>μν</sub> + f l<sub>μ</sub>l<sub>ν</sub> &nbsp;·&nbsp; H = ½[p² − E² − f(l·p+E)²]', 'spinning-hole rays as a Hamiltonian system']
         ]
 
         const references = [
-            'J. M. Bardeen, W. H. Press & S. A. Teukolsky (1972), ApJ 178 — rotating black holes: orbits and the ISCO',
-            'N. I. Shakura & R. A. Sunyaev (1973), A&A 24 — the thin accretion-disc model',
-            'J.-P. Luminet (1979), A&A 75 — the first simulated image of a black hole with a disc',
-            'O. James, E. von Tunzelmann, P. Franklin & K. S. Thorne (2015), CQG 32 — gravitational lensing in Interstellar (DNGR)',
-            'R. D. Blandford & R. L. Znajek (1977), MNRAS 179 — electromagnetic extraction of spin energy: the jet engine',
-            'GRAVITY Collaboration (2018), A&A 618 — orbital hot spots near Sgr A*',
-            'EHT Collaboration (2019), ApJL 875 — the image of M87*'
+            'J. M. Bardeen, W. H. Press & S. A. Teukolsky (1972), ApJ 178, rotating black holes: orbits and the ISCO',
+            'N. I. Shakura & R. A. Sunyaev (1973), A&A 24, the thin accretion-disc model',
+            'J.-P. Luminet (1979), A&A 75, the first simulated image of a black hole with a disc',
+            'O. James, E. von Tunzelmann, P. Franklin & K. S. Thorne (2015), CQG 32, gravitational lensing in Interstellar (DNGR)',
+            'R. D. Blandford & R. L. Znajek (1977), MNRAS 179, electromagnetic extraction of spin energy: the jet engine',
+            'GRAVITY Collaboration (2018), A&A 618, orbital hot spots near Sgr A*',
+            'EHT Collaboration (2019), ApJL 875, the image of M87*'
         ]
 
         const body = this.el('div', 'ui-science-body', card)
@@ -493,7 +493,7 @@ export default class UI
             ).join('') +
             '<div class="ui-refs-title">References</div>' +
             `<ul class="ui-refs">${references.map((r) => `<li>${r}</li>`).join('')}</ul>` +
-            '<p class="ui-star-cta">This project is open source — if it taught you something, ' +
+            '<p class="ui-star-cta">This project is open source, if it taught you something, ' +
             '<a href="https://github.com/ibra-kdbra/black-hole" target="_blank" rel="noopener">★ star it on GitHub</a>.</p>'
 
         const close = this.el('button', 'ui-preset', card, 'close')
