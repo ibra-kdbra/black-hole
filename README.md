@@ -26,7 +26,8 @@ Everything on screen is generated procedurally in GLSL — there is not a single
 - **Keplerian differential rotation** — disc plasma is advected with ω = √(GM/r³); the inner edge visibly laps the outer disc, shearing the turbulence into trailing spirals
 - **Kerr spin** — drag the spin slider from Schwarzschild to near-extremal (a = 0.998): the ISCO follows the exact Bardeen–Press–Teukolsky formula (6M → 1.24M), so the disc reaches deeper, the plasma gets faster, Lense–Thirring frame dragging accelerates the flow, and the shadow tightens
 - **Orbiting hot-spot flare** — a compact flare riding the flow just outside the inner edge at its true angular velocity, beamed and shifted like the plasma around it (the kind of orbiting spot the GRAVITY interferometer tracked around Sgr A*)
-- **Geodesic photo mode** — press `P` and every pixel integrates a real null geodesic of the Schwarzschild metric backwards from the camera (d²x/dλ² = −3/2 rs h² x/r⁵): the shadow, the photon ring and the lensed arcs of the disc's far side above and below the hole all emerge from the geometry itself — nothing painted on. Bloom, grain and supersampled screenshots still apply
+- **Geodesic photo mode** — press `P` and every pixel integrates a real null geodesic backwards from the camera: the shadow, the photon ring and the lensed arcs of the disc's far side above and below the hole all emerge from the geometry itself — nothing painted on. Schwarzschild uses the compact form d²x/dλ² = −3/2 rs h² x/r⁵; with spin the marcher switches to the **Kerr metric in Kerr–Schild coordinates**, integrated as a Hamiltonian system (H = ½[p² − E² − f(l·p+E)²]), so frame dragging, the displaced D-shaped shadow and the tightened prograde photon orbits appear for real. Bloom, grain and supersampled screenshots still apply
+- **Living event horizon** — the shadow's core stays void-black, but its silhouette simmers with palette-tinted turbulence concentrated toward the disc plane, and the photon ring's brightness crawls with the flow — the hole reads as a presence, not a matte ball
 - **Tidal disruption events** — press `T` and a star falls in on a parabolic orbit, stretches as it crosses the tidal radius, and is torn into 4 500 debris particles integrated with real gravity: about half escape, the rest rain back, circularize into the disc and feed an accretion flare that brightens the disc, the jets and the bloom before decaying away
 - **Relativistic Doppler beaming** — the approaching limb flares up (δ³ intensity boost) and blueshifts, the receding limb fades and reddens, from the actual orbital β = √(rs/2r) ≈ 0.41 c at the inner edge
 - **Gravitational redshift** — emission near the ISCO is dimmed and reddened by the combined orbital + gravitational time dilation √(1 − 3rs/2r)
@@ -59,9 +60,13 @@ Gargantua palette at spin a = 0.9 — the ISCO drops to 1.16 rs and the disc hug
 
 <img src="./docs/screenshots/gargantua.jpg" alt="Gargantua palette, spin 0.9" width="100%" />
 
-Geodesic photo mode (`P`) — the same disc, but every pixel ray-marches a true Schwarzschild null geodesic; the far side of the disc arcs over and under the shadow exactly as general relativity says it should:
+Geodesic photo mode (`P`) — the same disc, but every pixel ray-marches a true null geodesic; the far side of the disc arcs over and under the shadow exactly as general relativity says it should:
 
 <img src="./docs/screenshots/geodesic.jpg" alt="Geodesic photo mode" width="100%" />
+
+Spin it up to a = 0.9 in geodesic mode and the marcher switches to the Kerr metric: the shadow shrinks, turns D-shaped with the flat edge on the approaching side, and a prograde photon arc ignites inside it — all from integrating the metric:
+
+<img src="./docs/screenshots/kerr.jpg" alt="Kerr geodesic mode at spin 0.9" width="100%" />
 
 <img src="./docs/screenshots/interface.jpg" alt="Interface" width="100%" />
 
@@ -107,7 +112,7 @@ The scene uses geometric units with rs = 0.5 world units. From that single numbe
 | ISCO / disc inner edge | 3 rs | 1.5 |
 | Orbital speed at radius r | β = √(rs / 2r) | 0.41 c at ISCO |
 
-The disc fragment shader advects four octaves of periodic perlin noise with the local Keplerian angular velocity, then applies the relativistic Doppler factor δ = 1/γ(1 − β·cos θ) as a δ³ intensity boost with a spectral tilt, and the time-dilation factor √(1 − 3rs/2r) as dimming and reddening. The mass slider never rescales the scene — Schwarzschild geometry is scale-free — it drives the real-unit readouts in the HUD instead.
+The disc fragment shader advects four octaves of periodic perlin noise with the local Keplerian angular velocity — split into a rigid rotation plus a bounded, flow-map-crossfaded differential shear so the turbulence churns forever without winding into static filaments, while a radial drift keeps the plasma visibly falling inward. It then applies the relativistic Doppler factor δ = 1/γ(1 − β·cos θ) as a δ³ intensity boost with a spectral tilt, and the time-dilation factor √(1 − 3rs/2r) as dimming and reddening. The mass slider never rescales the scene — Schwarzschild geometry is scale-free — it drives the real-unit readouts in the HUD instead.
 
 The lensing is a screen-space approximation: two masks (a camera-facing halo and an in-plane disc field) are rendered to a deflection buffer, and the composition pass bends sample coordinates toward the singularity's projected position with that strength — cheap enough for any GPU, convincing enough to smear the star field around the shadow.
 
