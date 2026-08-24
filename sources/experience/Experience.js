@@ -16,6 +16,7 @@ import TidalDisruption from './TidalDisruption.js'
 import GeodesicView from './GeodesicView.js'
 import CameraRig from './CameraRig.js'
 import AmbientAudio from './AmbientAudio.js'
+import Inspector from './Inspector.js'
 import UI from './UI.js'
 
 import compositionVertex from '../shaders/composition/vertex.glsl'
@@ -62,6 +63,7 @@ export default class Experience
             shake: true,
             shakeAmplitude: 0.1,
             cinematic: false,
+            inspect: true,             // hover tooltips with live physics
 
             // Runtime
             paused: false,
@@ -107,6 +109,7 @@ export default class Experience
         this.setPostProcessing()
 
         this.ui = new UI(this)
+        this.inspector = new Inspector(this)
 
         this.applyShareState()
 
@@ -344,6 +347,7 @@ export default class Experience
         this.bloomPass.dispose?.()
 
         this.renderer.dispose()
+        this.inspector.destroy()
         this.ui.root.remove()
 
         if(window.experience === this) delete window.experience
@@ -563,6 +567,7 @@ export default class Experience
         }
 
         this.ui.update(delta)
+        this.inspector.update(delta)
 
         this.rafId = window.requestAnimationFrame(this.tick)
     }
