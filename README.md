@@ -48,7 +48,10 @@ Everything on screen is generated procedurally in GLSL — there is not a single
 - **Procedural ambient audio** — a brown-noise rumble and detuned drones synthesized live with WebAudio; the well sounds deeper and louder the closer you fall (opt-in)
 - **Shareable views** — one click copies a link that restores your exact settings and camera angle
 - **Film pipeline** — selective bloom, gravitationally-warped chromatic aberration, luminance-weighted animated grain, vignette — each with its own slider
+- **The science inside** — press `I` for the full derivation sheet: every equation the scene uses (Schwarzschild radius through the Kerr–Schild Hamiltonian) with the papers they come from — Bardeen–Press–Teukolsky, Shakura–Sunyaev, Luminet, the Interstellar DNGR paper, GRAVITY and the EHT
+- **First-visit onboarding** — the guided tour starts itself the first time someone opens the page (and never again after that)
 - **Quality & comfort** — adaptive auto quality that lowers resolution when the frame rate dips, manual low/medium/high presets, FPS meter, time scale & pause, one-key PNG screenshots (`S`), fullscreen (`F`), one-click reset, `prefers-reduced-motion` support
+- **Engineered to run lean** — every shader precompiles behind the intro (no mid-session compile stalls), the render loop allocates zero objects per frame, resizes and geometry rebuilds are coalesced, audio suspends in background tabs, and a full `destroy()` releases every GPU resource and listener
 
 ## 📸 Views
 
@@ -92,6 +95,7 @@ npm run build
 | `C` | cinematic mode (autonomous drift) |
 | `G` | guided tour |
 | `P` | geodesic photo mode |
+| `I` | the science inside — equations & references |
 | `T` | feed a star to the hole |
 | `Space` | pause time |
 | `S` | save a supersampled PNG screenshot |
