@@ -30,6 +30,7 @@ export default class GeodesicView
                 uTanHalfFov: { value: 1 },
                 uAspect: { value: 1 },
                 uRs: { value: physics.schwarzschildRadius },
+                uSpinA: { value: 0 },
                 uInnerRadius: { value: physics.iscoRadius },
                 uOuterRadius: { value: physics.discOuterRadius },
                 uEscapeRadius: { value: 45 },
@@ -61,6 +62,10 @@ export default class GeodesicView
         uniforms.uAspect.value = camera.aspect
 
         uniforms.uInnerRadius.value = experience.physics.iscoRadius
+
+        // Kerr parameter in length units: a = spin * M, capped just under
+        // extremal so the horizon square root stays real
+        uniforms.uSpinA.value = Math.min(params.spin, 0.998) * experience.physics.schwarzschildRadius / 2
         uniforms.uEscapeRadius.value = Math.max(45, uniforms.uCameraPosition.value.length() + 10)
 
         uniforms.uFlowSpeed.value = params.discSpeed
