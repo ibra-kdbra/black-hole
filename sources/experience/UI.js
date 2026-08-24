@@ -469,6 +469,7 @@ export default class UI
             ['Gravitational redshift', 'ν<sub>obs</sub>/ν<sub>em</sub> = √(1 − 3r<sub>s</sub>/2r)', 'combined orbital + gravitational time dilation'],
             ['Disc temperature', 'T ≈ 6.3×10⁷ K · (M/M<sub>☉</sub>)<sup>−1/4</sup>', 'thin-disc peak — Shakura & Sunyaev'],
             ['Tidal radius', 'r<sub>t</sub> ≈ R<sub>★</sub> (M<sub>BH</sub>/M<sub>★</sub>)<sup>1/3</sup>', 'where a star is torn apart (press T)'],
+            ['Relativistic jets', 'P<sub>jet</sub> ∝ a² Φ² (Blandford–Znajek)', 'the polar plasma columns — spin energy extracted magnetically, like M87\u2019s jet'],
             ['Null geodesics (photo mode)', 'd²x/dλ² = −(3/2) r<sub>s</sub> h² x/r⁵', 'Schwarzschild ray marching, h = |x×v| conserved'],
             ['Kerr–Schild metric (photo mode)', 'g<sub>μν</sub> = η<sub>μν</sub> + f l<sub>μ</sub>l<sub>ν</sub> &nbsp;·&nbsp; H = ½[p² − E² − f(l·p+E)²]', 'spinning-hole rays as a Hamiltonian system']
         ]
@@ -478,6 +479,7 @@ export default class UI
             'N. I. Shakura & R. A. Sunyaev (1973), A&A 24 — the thin accretion-disc model',
             'J.-P. Luminet (1979), A&A 75 — the first simulated image of a black hole with a disc',
             'O. James, E. von Tunzelmann, P. Franklin & K. S. Thorne (2015), CQG 32 — gravitational lensing in Interstellar (DNGR)',
+            'R. D. Blandford & R. L. Znajek (1977), MNRAS 179 — electromagnetic extraction of spin energy: the jet engine',
             'GRAVITY Collaboration (2018), A&A 618 — orbital hot spots near Sgr A*',
             'EHT Collaboration (2019), ApJL 875 — the image of M87*'
         ]
