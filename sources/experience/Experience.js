@@ -418,7 +418,7 @@ export default class Experience
         this.nebula.update(this.time)
         this.tidal.update(this.params.paused ? 0 : delta, this.time)
         this.disc.update(this.time)
-        this.blackHole.update(camera)
+        this.blackHole.update(camera, this.time)
         this.jets.update(this.time)
         this.distortion.update(camera)
         this.audio.update(delta, this.cameraRig.distanceToSingularity)
