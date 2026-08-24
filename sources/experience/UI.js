@@ -52,9 +52,35 @@ export default class UI
         this.setHud()
         this.setPlayback()
         this.setHelp()
+        this.setScience()
         this.setTour()
         this.setIntro()
         this.setKeyboard()
+        this.setFirstVisit()
+    }
+
+    /**
+     * First visit: start the guided tour once the intro has faded. Any
+     * interaction before it fires cancels it; localStorage remembers.
+     */
+    setFirstVisit()
+    {
+        try
+        {
+            if(window.localStorage.getItem('black-hole-visited')) return
+            window.localStorage.setItem('black-hole-visited', '1')
+        }
+        catch(error)
+        {
+            return
+        }
+
+        this.autoTourTimer = window.setTimeout(() => this.startTour(), 3200)
+        this.experience.canvas.addEventListener(
+            'pointerdown',
+            () => window.clearTimeout(this.autoTourTimer),
+            { once: true }
+        )
     }
 
     /* ------------------------------------------------------------------ */
@@ -212,6 +238,8 @@ export default class UI
         button('◔', 'Cinematic mode [C]', () => this.toggleCinematic())
         button('✦', 'Screenshot [S]', () => this.experience.requestScreenshot())
         button('⧉', 'Copy a link to this exact view', () => this.experience.copyShareLink())
+        button('Σ', 'The science inside [I]', () => this.scienceOverlay.classList.toggle('is-open'))
+        button('★', 'Star the project on GitHub', () => window.open('https://github.com/ibra-kdbra/black-hole', '_blank', 'noopener'))
         button('↺', 'Reset all settings', () => this.experience.reset())
         button('⛶', 'Fullscreen [F]', () => this.toggleFullscreen())
         button('?', 'Help [K]', () => this.helpOverlay.classList.toggle('is-open'))
@@ -237,7 +265,7 @@ export default class UI
             set: (v) =>
             {
                 this.params.spin = v
-                this.experience.disc.rebuild()
+                this.experience.disc.requestRebuild()
             }
         })
         this.paramSlider(physicsSection, 'Disc flow', 'discSpeed', 0, 3, 0.01, (v) => `${v.toFixed(2)}×`)
@@ -376,6 +404,7 @@ export default class UI
             ['G', 'guided tour'],
             ['T', 'feed a star to the hole'],
             ['P', 'geodesic photo mode'],
+            ['I', 'the science inside'],
             ['Space', 'pause time'],
             ['S', 'save screenshot'],
             ['F', 'fullscreen'],
@@ -397,12 +426,61 @@ export default class UI
         })
     }
 
+    setScience()
+    {
+        this.scienceOverlay = this.el('div', 'ui-help ui-science', this.root)
+        const card = this.el('div', 'ui-help-card ui-science-card', this.scienceOverlay)
+        this.el('h2', null, card, 'The science inside')
+
+        const equations = [
+            ['Schwarzschild radius', 'r<sub>s</sub> = 2GM/c²', 'sets every scale in the scene; km readout in the HUD'],
+            ['Photon sphere', 'r<sub>ph</sub> = 1.5 r<sub>s</sub>', 'unstable circular light orbits'],
+            ['Shadow radius', 'r<sub>sh</sub> = (√27/2) r<sub>s</sub> ≈ 2.6 r<sub>s</sub>', 'the lensed silhouette and the photon ring'],
+            ['ISCO (Kerr, prograde)', 'r = M[3 + Z₂ − √((3−Z₁)(3+Z₁+2Z₂))]', 'disc inner edge vs. spin — Bardeen, Press & Teukolsky'],
+            ['Keplerian flow', 'Ω = √(GM/r³) &nbsp;·&nbsp; ω<sub>LT</sub> = 2GJ/c²r³', 'disc advection, frame dragging, hot-spot orbit'],
+            ['Orbital speed', 'β = √(r<sub>s</sub>/2r) → 0.41c at 3 r<sub>s</sub>', 'plasma velocity for the Doppler terms'],
+            ['Doppler beaming', 'δ = 1/[γ(1 − β cos θ)] &nbsp;·&nbsp; I ∝ δ³', 'the bright approaching limb, dim receding limb'],
+            ['Gravitational redshift', 'ν<sub>obs</sub>/ν<sub>em</sub> = √(1 − 3r<sub>s</sub>/2r)', 'combined orbital + gravitational time dilation'],
+            ['Disc temperature', 'T ≈ 6.3×10⁷ K · (M/M<sub>☉</sub>)<sup>−1/4</sup>', 'thin-disc peak — Shakura & Sunyaev'],
+            ['Tidal radius', 'r<sub>t</sub> ≈ R<sub>★</sub> (M<sub>BH</sub>/M<sub>★</sub>)<sup>1/3</sup>', 'where a star is torn apart (press T)'],
+            ['Null geodesics (photo mode)', 'd²x/dλ² = −(3/2) r<sub>s</sub> h² x/r⁵', 'Schwarzschild ray marching, h = |x×v| conserved'],
+            ['Kerr–Schild metric (photo mode)', 'g<sub>μν</sub> = η<sub>μν</sub> + f l<sub>μ</sub>l<sub>ν</sub> &nbsp;·&nbsp; H = ½[p² − E² − f(l·p+E)²]', 'spinning-hole rays as a Hamiltonian system']
+        ]
+
+        const references = [
+            'J. M. Bardeen, W. H. Press & S. A. Teukolsky (1972), ApJ 178 — rotating black holes: orbits and the ISCO',
+            'N. I. Shakura & R. A. Sunyaev (1973), A&A 24 — the thin accretion-disc model',
+            'J.-P. Luminet (1979), A&A 75 — the first simulated image of a black hole with a disc',
+            'O. James, E. von Tunzelmann, P. Franklin & K. S. Thorne (2015), CQG 32 — gravitational lensing in Interstellar (DNGR)',
+            'GRAVITY Collaboration (2018), A&A 618 — orbital hot spots near Sgr A*',
+            'EHT Collaboration (2019), ApJL 875 — the image of M87*'
+        ]
+
+        const body = this.el('div', 'ui-science-body', card)
+        body.innerHTML =
+            equations.map(([name, formula, note]) =>
+                `<div class="ui-eq"><span class="ui-eq-name">${name}</span><span class="ui-eq-formula">${formula}</span><span class="ui-eq-note">${note}</span></div>`
+            ).join('') +
+            '<div class="ui-refs-title">References</div>' +
+            `<ul class="ui-refs">${references.map((r) => `<li>${r}</li>`).join('')}</ul>` +
+            '<p class="ui-star-cta">This project is open source — if it taught you something, ' +
+            '<a href="https://github.com/ibra-kdbra/black-hole" target="_blank" rel="noopener">★ star it on GitHub</a>.</p>'
+
+        const close = this.el('button', 'ui-preset', card, 'close')
+        close.addEventListener('click', () => this.scienceOverlay.classList.remove('is-open'))
+        this.scienceOverlay.addEventListener('click', (event) =>
+        {
+            if(event.target === this.scienceOverlay) this.scienceOverlay.classList.remove('is-open')
+        })
+    }
+
     setTour()
     {
         this.tour = this.el('div', 'ui-tour', this.root)
         this.tourText = this.el('p', 'ui-tour-text', this.tour)
 
         const controls = this.el('div', 'ui-tour-controls', this.tour)
+        this.tourProgress = this.el('span', 'ui-tour-progress', controls)
         const next = this.el('button', 'ui-preset', controls, 'next')
         next.addEventListener('click', () => this.nextTourStep())
         const end = this.el('button', 'ui-preset', controls, 'end tour')
@@ -442,7 +520,15 @@ export default class UI
 
         if(step.preset) this.experience.cameraRig.flyTo(step.preset)
         if(step.action) step.action(this.experience)
-        this.tourText.textContent = step.text
+
+        // Crossfade the caption instead of hard-swapping it
+        this.tourText.classList.remove('is-in')
+        window.setTimeout(() =>
+        {
+            this.tourText.textContent = step.text
+            this.tourText.classList.add('is-in')
+        }, 240)
+        this.tourProgress.textContent = `${this.tourIndex + 1} / ${UI.TOUR.length}`
         this.syncControls()
 
         this.tourTimer = window.setTimeout(() => this.nextTourStep(), 9500)
@@ -493,6 +579,7 @@ export default class UI
                     this.syncControls()
                     break
                 case 'g': this.toggleTour(); break
+                case 'i': this.scienceOverlay.classList.toggle('is-open'); break
                 case 'k': this.helpOverlay.classList.toggle('is-open'); break
                 case '1': this.experience.cameraRig.flyTo('overview'); break
                 case '2': this.experience.cameraRig.flyTo('edge'); break

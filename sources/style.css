@@ -427,14 +427,136 @@ canvas.webgl
     color: var(--text);
     text-shadow: 0 1px 8px rgba(0, 0, 0, 0.6);
     min-height: 42px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.ui-tour-text.is-in
+{
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .ui-tour-controls
 {
     display: flex;
+    align-items: center;
     justify-content: flex-end;
     gap: 8px;
     margin-top: 10px;
+}
+
+.ui-tour-progress
+{
+    margin-right: auto;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--text-dim);
+}
+
+/* ------------------------------------------------------------------ */
+/* Science panel                                                       */
+/* ------------------------------------------------------------------ */
+
+.ui-science-card
+{
+    width: min(620px, calc(100vw - 48px));
+    max-height: min(78vh, 720px);
+    display: flex;
+    flex-direction: column;
+}
+
+.ui-science-body
+{
+    overflow-y: auto;
+    margin-bottom: 18px;
+    padding-right: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 188, 104, 0.25) transparent;
+}
+
+.ui-eq
+{
+    display: grid;
+    grid-template-columns: 168px 1fr;
+    gap: 2px 16px;
+    padding: 9px 0;
+    border-bottom: 1px solid rgba(255, 188, 104, 0.08);
+}
+
+.ui-eq-name
+{
+    grid-row: span 2;
+    align-self: center;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent-soft);
+}
+
+.ui-eq-formula
+{
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text);
+}
+
+.ui-eq-note
+{
+    font-size: 10.5px;
+    color: var(--text-dim);
+}
+
+.ui-refs-title
+{
+    margin: 16px 0 8px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent-soft);
+}
+
+.ui-refs
+{
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 11px;
+    line-height: 1.45;
+    color: var(--text-dim);
+}
+
+.ui-refs li::before
+{
+    content: '·';
+    color: var(--accent);
+    margin-right: 8px;
+}
+
+.ui-star-cta
+{
+    margin-top: 16px;
+    font-size: 11.5px;
+    color: var(--text-dim);
+}
+
+.ui-star-cta a
+{
+    color: var(--accent-soft);
+    text-decoration: none;
+    border-bottom: 1px solid rgba(255, 188, 104, 0.4);
+    transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.ui-star-cta a:hover
+{
+    color: var(--accent);
+    border-color: var(--accent);
 }
 
 .ui-tour-controls .ui-preset
