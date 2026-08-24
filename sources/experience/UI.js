@@ -692,7 +692,7 @@ export default class UI
             ['Disc temperature', `${UI.sci(physics.discTemperatureK)} K`],
             ['Plasma at ISCO', `${(physics.orbitalBeta(physics.iscoRadius) * 100).toFixed(1)}% c`],
             ['Observer altitude', `${distanceRs.toFixed(1)} rₛ`],
-            ['Your clock rate', `${(physics.timeDilation(distance) * 100).toFixed(2)}%`]
+            ['Time dilation (you)', `dτ/dt = ${physics.timeDilation(distance).toFixed(4)}`]
         ]
 
         const flare = this.experience.tidal.flare

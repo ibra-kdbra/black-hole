@@ -39,7 +39,7 @@ export default class Disc
                 uTime: { value: 0 },
                 uGradientTexture: { value: this.gradient.texture },
                 uNoisesTexture: { value: experience.noises.texture },
-                uInnerRadius: { value: physics.iscoRadius },
+                uInnerRadius: { value: physics.discInnerRadius },
                 uOuterRadius: { value: this.outerRadius },
                 uSchwarzschildRadius: { value: physics.schwarzschildRadius },
                 uSpin: { value: experience.params.spin },
@@ -50,7 +50,7 @@ export default class Disc
                 uBrightness: { value: experience.params.brightness },
                 uHotSpot: { value: 0 },
                 uHotSpotPhase: { value: 0 },
-                uHotSpotRadius: { value: physics.iscoRadius * 1.15 }
+                uHotSpotRadius: { value: physics.discInnerRadius * 1.15 }
             }
         })
 
@@ -60,7 +60,7 @@ export default class Disc
 
     buildGeometry()
     {
-        return new THREE.CylinderGeometry(this.experience.physics.iscoRadius, this.outerRadius, 0, 64, 10, true)
+        return new THREE.CylinderGeometry(this.experience.physics.discInnerRadius, this.outerRadius, 0, 64, 10, true)
     }
 
     /**
@@ -80,7 +80,7 @@ export default class Disc
         this.rebuildQueued = false
         this.mesh.geometry.dispose()
         this.mesh.geometry = this.buildGeometry()
-        this.material.uniforms.uInnerRadius.value = this.experience.physics.iscoRadius
+        this.material.uniforms.uInnerRadius.value = this.experience.physics.discInnerRadius
     }
 
     setGradient(paletteName)
@@ -133,7 +133,7 @@ export default class Disc
 
         // Hot spot: ride the (Kepler + frame dragging) flow just outside the
         // inner edge, kept clear of the shadow, breathing slowly
-        const spotRadius = Math.max(physics.iscoRadius * 1.15, physics.shadowRadius * 1.2)
+        const spotRadius = Math.max(physics.discInnerRadius * 1.15, physics.shadowRadius * 1.2)
         const M = physics.schwarzschildRadius / 2
         const r3 = spotRadius * spotRadius * spotRadius
         const omega = Math.sqrt(M / r3) + params.spin * 2 * M * M / r3
